@@ -176,24 +176,18 @@ def ask_question_route(): # Renamed to avoid conflict with HRAssistant.ask_quest
 @app.route('/translate', methods=['POST'])
 def translate_text_route():
     """
-    Translate a given text to a target language using OpenAI.
+    Translate a given text to a target language using OpenAI, streaming the response.
     The source language can be provided or detected by the AI.
     """
     data = request.get_json()
     text_to_translate = data.get('text', '').strip()
-    # Language key for the target language (e.g., 'english', 'chinese_simplified')
-    target_language_key = data.get('target_language', 'english') 
-    # Optional: language key for the source language
-    source_language_key = data.get('source_language') 
-    
+    target_language_key = data.get('target_language', 'english')
+    source_language_key = data.get('source_language')
     api_key_from_session = session.get('openai_api_key')
 
     if not text_to_translate:
-        # This error message should ideally be in the app's current display language,
-        # but target_language_key might be the most relevant context here.
-        return jsonify({'error': 'No text provided for translation.'}), 400 
-    
-    # Define API key error messages for translation context
+        return jsonify({'error': 'No text provided for translation.'}), 400
+
     error_messages_no_api_key_translate = {
         'english': "API key not configured. Please set it in Settings.",
         'spanish': "Clave API no configurada. Por favor, configúrela en Ajustes.",
@@ -207,10 +201,8 @@ def translate_text_route():
         return jsonify({'error': error_msg}), 401
 
     try:
-        # Initialize OpenAI client for this specific translation task
         translation_client = OpenAI(api_key=api_key_from_session)
         
-        # Map internal language keys to names preferred by OpenAI for prompts (if different)
         language_names_for_openai_prompt = {
             "english": "English",
             "spanish": "Spanish",
@@ -219,10 +211,9 @@ def translate_text_route():
         }
         
         prompt_target_language_name = language_names_for_openai_prompt.get(
-            target_language_key, target_language_key.capitalize() # Default to capitalized key if not in map
+            target_language_key, target_language_key.capitalize()
         )
         
-        # Construct the prompt for OpenAI
         if source_language_key and source_language_key in language_names_for_openai_prompt:
             prompt_source_language_name = language_names_for_openai_prompt[source_language_key]
             prompt_content = (
@@ -231,7 +222,7 @@ def translate_text_route():
                 f"Respond ONLY with the translated text itself, without any surrounding text, explanations, or conversational remarks.\n\n"
                 f"Original text:\n{text_to_translate}"
             )
-        else: # If source language is not provided or unknown, ask the model to detect it
+        else:
             prompt_content = (
                 f"Detect the language of the following text and then translate it to {prompt_target_language_name}. "
                 f"Preserve all original formatting, including markdown, HTML tags, lists, newlines, and special characters. "
@@ -239,11 +230,9 @@ def translate_text_route():
                 f"Text to translate:\n{text_to_translate}"
             )
         
-        # Make the API call to OpenAI for translation
-        # Use the CHAT model defined in HRAssistant for consistency, or choose another like "gpt-3.5-turbo"
-        # The original 'assistant.OPENAI_MODEL' should be 'assistant.OPENAI_CHAT_MODEL' based on query.py
-        response = translation_client.chat.completions.create(
-            model=assistant.OPENAI_CHAT_MODEL, # Using the chat model defined in HRAssistant
+        # The key change is to add stream=True
+        response_stream = translation_client.chat.completions.create(
+            model=assistant.OPENAI_CHAT_MODEL,
             messages=[
                 {
                     "role": "system",
@@ -255,19 +244,34 @@ def translate_text_route():
                 },
                 {"role": "user", "content": prompt_content}
             ],
-            temperature=0.1, # Lower temperature for more deterministic and accurate translations
-            max_tokens=3500  # Adjust based on expected length of text; ensure it's sufficient
+            temperature=0.1,
+            max_tokens=3500,
+            stream=True  # Enable streaming
         )
-        
-        translated_text_content = response.choices[0].message.content.strip()
-        return jsonify({'translated_text': translated_text_content})
-        
+
+        def generate_translation_stream():
+            """Generator function to stream the translation response."""
+            try:
+                for chunk in response_stream:
+                    if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
+                        token = chunk.choices[0].delta.content
+                        # Yield each token in the Server-Sent Events (SSE) format
+                        yield f"data: {json.dumps({'token': token})}\n\n"
+            except Exception as stream_ex:
+                app.logger.error(f"Exception during translation streaming: {str(stream_ex)}")
+            finally:
+                # Signal the end of the stream to the client
+                yield f"data: [DONE]\n\n"
+
+        # Return a streaming response
+        return Response(generate_translation_stream(), mimetype='text/event-stream')
+
     except Exception as e:
         app.logger.error(f"Translation API Error: {str(e)}", exc_info=True)
-        # Generic error message, or could be localized based on target_language_key if desired
-        error_msg_server = f"Translation error: {str(e)}" 
-        if "authentication" in str(e).lower() or "api key" in str(e).lower(): # More specific error for auth issues
+        error_msg_server = f"Translation error: {str(e)}"
+        if "authentication" in str(e).lower() or "api key" in str(e).lower():
              error_msg_server = "Translation failed due to an invalid API key or authentication issue. Please check your API key in Settings."
+        # This error will now be caught by the frontend's `.catch()` block
         return jsonify({'error': error_msg_server}), 500
 
 
