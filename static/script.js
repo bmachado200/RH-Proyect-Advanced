@@ -504,16 +504,15 @@ function translateMessage(messageElement, targetLanguage) {
     const messageTextElement = messageElement.querySelector('.message-text');
     if (!messageTextElement || messageTextElement.dataset.translationInProgress === "true") return;
 
-    if (!messageTextElement.dataset.originalText) { // First time translating this specific message
-        messageTextElement.dataset.originalText = messageTextElement.innerHTML; // Store current HTML as original
+    if (!messageTextElement.dataset.originalText) {
+        messageTextElement.dataset.originalText = messageTextElement.innerHTML;
         messageTextElement.dataset.originalLanguage = messageElement.dataset.currentLanguage || appLanguage;
     }
     
-    const textToTranslate = messageTextElement.dataset.originalText; // Always translate from the stored original
+    const textToTranslate = messageTextElement.dataset.originalText;
     const sourceLanguageForPrompt = messageTextElement.dataset.originalLanguage;
 
     messageTextElement.dataset.translationInProgress = "true";
-    const currentVisibleHTML = messageTextElement.innerHTML; // To restore if translation fails early
     messageTextElement.innerHTML = `<div class="loading-translation">${translations[appLanguage].translating}</div>`;
     
     const toggleButton = messageElement.querySelector('.translate-dropdown-toggle');
@@ -521,29 +520,86 @@ function translateMessage(messageElement, targetLanguage) {
 
     fetch('/translate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'text/event-stream' // Important: Accept event stream
+        },
         body: JSON.stringify({
             text: textToTranslate,
             target_language: targetLanguage,
             source_language: sourceLanguageForPrompt 
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error || !data.translated_text) {
-            messageTextElement.innerHTML = currentVisibleHTML; 
-            console.error('Translation error:', data.error || "No translated text received");
-        } else {
-            messageTextElement.innerHTML = data.translated_text;
-            messageElement.dataset.currentLanguage = targetLanguage; 
-            createMessageTranslationDropdown(messageElement); // Rebuild dropdown with updated options
+    .then(response => {
+        if (!response.ok) {
+            // Handle HTTP errors (like 401, 500) which won't be part of the stream
+            return response.json().then(errData => {
+                throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+            });
         }
+
+        // Clear the "Translating..." message and prepare for the new content
+        messageTextElement.innerHTML = '';
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let partialData = '';
+        let fullTranslatedResponse = "";
+
+        function readStream() {
+            reader.read().then(({ done, value }) => {
+                if (done) {
+                    // Stream finished
+                    delete messageTextElement.dataset.translationInProgress;
+                    if (toggleButton) toggleButton.disabled = false;
+                    
+                    // Store the final translated content as the new original for this message
+                    messageTextElement.dataset.originalText = fullTranslatedResponse;
+                    messageElement.dataset.currentLanguage = targetLanguage;
+                    
+                    // Re-create the dropdown with updated language options
+                    createMessageTranslationDropdown(messageElement);
+                    return;
+                }
+
+                partialData += decoder.decode(value, { stream: true });
+                const lines = partialData.split('\n\n');
+                partialData = lines.pop(); // Keep the last, potentially incomplete, line
+
+                lines.forEach(line => {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const jsonData = line.substring(6);
+                            if (jsonData.trim() === "[DONE]") return; // End of stream signal
+                            
+                            const data = JSON.parse(jsonData);
+                            if (data.token) {
+                                messageTextElement.innerHTML += data.token;
+                                fullTranslatedResponse += data.token;
+                            }
+                            if (data.error) {
+                                console.error("Server error during translation stream:", data.error);
+                                messageTextElement.innerHTML += `<br><span class="stream-error">Error: ${data.error}</span>`;
+                            }
+                        } catch (e) {
+                            console.error("Error parsing translation stream data:", e, "Line:", line);
+                        }
+                    }
+                });
+                
+                return readStream(); // Continue reading the stream
+            }).catch(streamError => {
+                console.error('Translation stream reading error:', streamError);
+                messageTextElement.innerHTML = messageTextElement.dataset.originalText; // Restore original on error
+                delete messageTextElement.dataset.translationInProgress;
+                if (toggleButton) toggleButton.disabled = false;
+            });
+        }
+        return readStream();
     })
     .catch(error => {
-        console.error('Translation failed:', error);
-        messageTextElement.innerHTML = currentVisibleHTML; 
-    })
-    .finally(() => {
+        console.error('Translation fetch failed:', error);
+        // Restore the original text if the fetch fails
+        messageTextElement.innerHTML = messageTextElement.dataset.originalText || "Error during translation.";
         delete messageTextElement.dataset.translationInProgress;
         if (toggleButton) toggleButton.disabled = false;
     });
