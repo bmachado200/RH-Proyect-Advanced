@@ -196,6 +196,7 @@ const availableLanguages = {
 const chatTitle = document.getElementById('chatTitle');
 const userInput = document.getElementById('userInput');
 const sendButton = document.getElementById('sendButton');
+const stopButton = document.getElementById('stopButton');
 const chatBox = document.getElementById('chatBox');
 const loadingScreen = document.getElementById('loadingScreen');
 const appContainer = document.getElementById('appContainer');
@@ -220,6 +221,8 @@ const currentLanguageDisplay = document.getElementById('currentLanguageDisplay')
 const languageButtonText = document.getElementById('languageButtonText'); // The span inside currentLanguageDisplay
 const languageOptions = document.getElementById('languageOptions'); // The div holding the language choices
 
+// Global variable to hold the AbortController
+let abortController = null;
 
 function initUI() {
     welcomeTitle.textContent = translations[appLanguage].welcome;
@@ -504,16 +507,15 @@ function translateMessage(messageElement, targetLanguage) {
     const messageTextElement = messageElement.querySelector('.message-text');
     if (!messageTextElement || messageTextElement.dataset.translationInProgress === "true") return;
 
-    if (!messageTextElement.dataset.originalText) { // First time translating this specific message
-        messageTextElement.dataset.originalText = messageTextElement.innerHTML; // Store current HTML as original
+    if (!messageTextElement.dataset.originalText) {
+        messageTextElement.dataset.originalText = messageTextElement.innerHTML;
         messageTextElement.dataset.originalLanguage = messageElement.dataset.currentLanguage || appLanguage;
     }
     
-    const textToTranslate = messageTextElement.dataset.originalText; // Always translate from the stored original
+    const textToTranslate = messageTextElement.dataset.originalText;
     const sourceLanguageForPrompt = messageTextElement.dataset.originalLanguage;
 
     messageTextElement.dataset.translationInProgress = "true";
-    const currentVisibleHTML = messageTextElement.innerHTML; // To restore if translation fails early
     messageTextElement.innerHTML = `<div class="loading-translation">${translations[appLanguage].translating}</div>`;
     
     const toggleButton = messageElement.querySelector('.translate-dropdown-toggle');
@@ -521,29 +523,86 @@ function translateMessage(messageElement, targetLanguage) {
 
     fetch('/translate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'text/event-stream' // Important: Accept event stream
+        },
         body: JSON.stringify({
             text: textToTranslate,
             target_language: targetLanguage,
             source_language: sourceLanguageForPrompt 
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error || !data.translated_text) {
-            messageTextElement.innerHTML = currentVisibleHTML; 
-            console.error('Translation error:', data.error || "No translated text received");
-        } else {
-            messageTextElement.innerHTML = data.translated_text;
-            messageElement.dataset.currentLanguage = targetLanguage; 
-            createMessageTranslationDropdown(messageElement); // Rebuild dropdown with updated options
+    .then(response => {
+        if (!response.ok) {
+            // Handle HTTP errors (like 401, 500) which won't be part of the stream
+            return response.json().then(errData => {
+                throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+            });
         }
+
+        // Clear the "Translating..." message and prepare for the new content
+        messageTextElement.innerHTML = '';
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let partialData = '';
+        let fullTranslatedResponse = "";
+
+        function readStream() {
+            reader.read().then(({ done, value }) => {
+                if (done) {
+                    // Stream finished
+                    delete messageTextElement.dataset.translationInProgress;
+                    if (toggleButton) toggleButton.disabled = false;
+                    
+                    // Store the final translated content as the new original for this message
+                    messageTextElement.dataset.originalText = fullTranslatedResponse;
+                    messageElement.dataset.currentLanguage = targetLanguage;
+                    
+                    // Re-create the dropdown with updated language options
+                    createMessageTranslationDropdown(messageElement);
+                    return;
+                }
+
+                partialData += decoder.decode(value, { stream: true });
+                const lines = partialData.split('\n\n');
+                partialData = lines.pop(); // Keep the last, potentially incomplete, line
+
+                lines.forEach(line => {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const jsonData = line.substring(6);
+                            if (jsonData.trim() === "[DONE]") return; // End of stream signal
+                            
+                            const data = JSON.parse(jsonData);
+                            if (data.token) {
+                                messageTextElement.innerHTML += data.token;
+                                fullTranslatedResponse += data.token;
+                            }
+                            if (data.error) {
+                                console.error("Server error during translation stream:", data.error);
+                                messageTextElement.innerHTML += `<br><span class="stream-error">Error: ${data.error}</span>`;
+                            }
+                        } catch (e) {
+                            console.error("Error parsing translation stream data:", e, "Line:", line);
+                        }
+                    }
+                });
+                
+                return readStream(); // Continue reading the stream
+            }).catch(streamError => {
+                console.error('Translation stream reading error:', streamError);
+                messageTextElement.innerHTML = messageTextElement.dataset.originalText; // Restore original on error
+                delete messageTextElement.dataset.translationInProgress;
+                if (toggleButton) toggleButton.disabled = false;
+            });
+        }
+        return readStream();
     })
     .catch(error => {
-        console.error('Translation failed:', error);
-        messageTextElement.innerHTML = currentVisibleHTML; 
-    })
-    .finally(() => {
+        console.error('Translation fetch failed:', error);
+        // Restore the original text if the fetch fails
+        messageTextElement.innerHTML = messageTextElement.dataset.originalText || "Error during translation.";
         delete messageTextElement.dataset.translationInProgress;
         if (toggleButton) toggleButton.disabled = false;
     });
@@ -603,6 +662,19 @@ function addUserMessage(message) {
     chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
 }
 
+function toggleChatButtons(isGenerating) {
+    if (isGenerating) {
+        sendButton.style.display = 'none';
+        stopButton.style.display = 'inline-block';
+        sendButton.disabled = true;
+        stopButton.disabled = false;
+    } else {
+        sendButton.style.display = 'inline-block';
+        stopButton.style.display = 'none';
+        sendButton.disabled = userInput.value.trim().length === 0;
+    }
+}
+
 function sendMessage() {
     const question = userInput.value.trim();
     if (!question) {
@@ -611,7 +683,9 @@ function sendMessage() {
     }
     addUserMessage(question);
     userInput.value = '';
-    sendButton.disabled = true;
+
+    toggleChatButtons(true);
+    abortController = new AbortController();
 
     const botResponseContainer = document.createElement('div');
     botResponseContainer.className = 'message bot-message';
@@ -633,7 +707,8 @@ function sendMessage() {
     fetch('/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
-        body: JSON.stringify({ question: question, language: appLanguage })
+        body: JSON.stringify({ question: question, language: appLanguage }),
+        signal: abortController.signal
     })
     .then(response => {
         if (!response.ok) {
@@ -652,7 +727,6 @@ function sendMessage() {
             reader.read().then(({ done, value }) => {
                 if (done) {
                     botResponseContainer.classList.remove('streaming');
-                    sendButton.disabled = false;
                     messageTextElement.dataset.originalText = fullStreamedResponse; // Store full response
                     createMessageTranslationDropdown(botResponseContainer);
                     chatBox.scrollTop = chatBox.scrollHeight;
@@ -684,17 +758,32 @@ function sendMessage() {
             }).catch(streamError => {
                  console.error('Stream reading error:', streamError);
                  if (botResponseContainer.parentNode === chatBox) chatBox.removeChild(botResponseContainer);
-                 addBotMessage(`${translations[appLanguage].error.split("<a")[0]}: Streaming failed.`, false); // Avoid link in this specific error
-                 sendButton.disabled = false;
+                 addBotMessage(`${translations[appLanguage].error.split("<a")[0]}: Streaming failed.`, false);
             });
         }
         return readStream();
     })
     .catch(error => {
-        console.error('Fetch/Ask Error:', error);
-        if (botResponseContainer && botResponseContainer.parentNode === chatBox) chatBox.removeChild(botResponseContainer);
-        addBotMessage(`${translations[appLanguage].error.split("<a")[0]}: ${error.message}`, false); // Avoid link
-        sendButton.disabled = false;
+        if (error.name === 'AbortError') {
+            console.log('Fetch aborted by user.');
+            if (botResponseContainer && botResponseContainer.parentNode === chatBox) {
+                const messageText = botResponseContainer.querySelector('.message-text');
+                if (messageText) {
+                    messageText.innerHTML = 'Response generation stopped by user.';
+                    botResponseContainer.classList.remove('streaming');
+                }
+            }
+        } else {
+            console.error('Fetch/Ask Error:', error);
+            if (botResponseContainer && botResponseContainer.parentNode === chatBox) {
+                chatBox.removeChild(botResponseContainer);
+            }
+            addBotMessage(`${translations[appLanguage].error.split("<a")[0]}: ${error.message}`, false);
+        }
+    })
+    .finally(() => {
+        toggleChatButtons(false);
+        abortController = null;
     });
 }
 
@@ -716,7 +805,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    userInput.addEventListener('input', () => sendButton.disabled = userInput.value.trim().length === 0);
+    userInput.addEventListener('input', () => {
+        // Only enable send button if not currently generating a response
+        if (sendButton.style.display !== 'none') {
+            sendButton.disabled = userInput.value.trim().length === 0;
+        }
+    });
     sendButton.disabled = true;
 
     sendButton.addEventListener('click', sendMessage);
@@ -724,6 +818,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             if (!sendButton.disabled) sendMessage();
+        }
+    });
+
+    stopButton.addEventListener('click', () => {
+        if (abortController) {
+            abortController.abort();
+            stopButton.disabled = true;
         }
     });
 

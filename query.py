@@ -1,6 +1,6 @@
 import chromadb
 from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
-from openai import OpenAI
+from openai import OpenAI, Timeout
 import os
 from typing import Generator, Union, List, Dict # Added Dict for type hinting
 from pathlib import Path # Import the Path object from pathlib import Path # Added for DB_DIR consistency
@@ -13,7 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 class HRAssistant:
-    def __init__(self, default_api_key: str = None): # Allow API key at init for convenience
+    # MODIFICACIÓN: El constructor ahora requiere una clave para Chroma y opcionalmente una para chat.
+    def __init__(self, chroma_api_key: str, default_chat_api_key: str = None):
+        if not chroma_api_key:
+            raise ValueError("A ChromaDB API key (chroma_api_key) is required for initialization.")
+        
         # Configuration
         # Ensure these match the values used in loader.py
         self.BASE_DIR = Path(__file__).resolve().parent # Consistent path definition
@@ -26,17 +30,20 @@ class HRAssistant:
         # This assumes the DB directory and collection will be created/populated by loader.py
         self.client_chroma = chromadb.PersistentClient(path=self.DB_DIR)
         
-        self._default_api_key = default_api_key # Store for convenience
+        # MODIFICACIÓN: Almacenamos las claves con nombres claros
+        self._chroma_api_key = chroma_api_key
+        self._default_chat_api_key = default_chat_api_key
 
         logger.info(f"HRAssistant initialized. ChromaDB path: {self.DB_DIR}, Collection: {self.collection_name}")
         logger.info(f"Expecting collection '{self.collection_name}' to be populated by loader.py.")
 
 
     def _get_openai_client(self, api_key: str) -> OpenAI:
-        """Helper to get an OpenAI client instance."""
+        """Helper to get an OpenAI client instance with a timeout."""
         if not api_key:
             raise ValueError("API key is required to initialize OpenAI client.")
-        return OpenAI(api_key=api_key)
+        # Add a 30-second timeout to API calls
+        return OpenAI(api_key=api_key, timeout=Timeout(30.0, connect=5.0))
 
     def _get_embedding_function(self, api_key: str) -> OpenAIEmbeddingFunction:
         """Helper to get an OpenAIEmbeddingFunction instance."""
@@ -209,31 +216,36 @@ Answer in {language}:
         language: str = 'english', # Default from your original file
         conversation_history: List[Dict[str, str]] = None, # Type hint for clarity
         top_k: int = 3,
-        api_key: str = None
+        # MODIFICACIÓN: El parámetro se renombra para mayor claridad
+        chat_api_key: str = None
     ) -> Union[str, Generator[str, None, None]]:
         """
-        Ask a question and get a streaming response using the provided API key.
+        Ask a question and get a streaming response.
+        Uses the instance's chroma_api_key for context retrieval and the provided
+        chat_api_key for response generation.
         """
         if conversation_history is None:
             conversation_history = []
 
-        current_api_key = api_key or self._default_api_key
-        if not current_api_key:
-            err_msg_en = "⚠️ API key not provided. Please provide an API key to the 'ask_question' method or during HRAssistant initialization."
-            err_msg_es = "⚠️ Clave API no proporcionada. Por favor, proporcione una clave API al método 'ask_question' o durante la inicialización de HRAssistant."
+        # MODIFICACIÓN: Lógica para determinar la clave de CHAT
+        current_chat_api_key = chat_api_key or self._default_chat_api_key
+        if not current_chat_api_key:
+            err_msg_en = "⚠️ Chat API key not provided. Please provide an API key for response generation."
+            err_msg_es = "⚠️ Clave API de chat no proporcionada. Por favor, proporcione una clave API para la generación de respuestas."
             return err_msg_en if language == 'english' else err_msg_es
 
         try:
-            # Initialize OpenAI client for this specific call using the provided API key
-            current_openai_client = self._get_openai_client(api_key=current_api_key)
+            # MODIFICACIÓN: Usamos la clave de CHAT solo para el cliente de chat
+            current_openai_client = self._get_openai_client(api_key=current_chat_api_key)
             
-            # Get context from ChromaDB (this also uses the api_key for embeddings)
-            context = self._get_context_from_db(question, api_key=current_api_key, top_k=top_k)
+            # MODIFICACIÓN CRÍTICA: Usamos la clave de CHROMA para obtener el contexto de la base de datos
+            context = self._get_context_from_db(question, api_key=self._chroma_api_key, top_k=top_k)
             
             if not context:
                 # Check if the collection exists and is empty
                 try:
-                    collection = self._get_chroma_collection(api_key=current_api_key)
+                    # Usamos la clave de CHROMA para acceder a la colección y verificar su estado
+                    collection = self._get_chroma_collection(api_key=self._chroma_api_key)
                     if collection.count() == 0:
                         logger.warning("No context found, and the ChromaDB collection is empty. Ensure 'loader.py' has run and populated documents.")
                         empty_msg_en = " The knowledge base appears to be empty. Please run the loader script to add documents."
@@ -358,8 +370,7 @@ if __name__ == "__main__":
     logger.info("Starting HR Assistant Query script.")
 
     # Attempt to load API key from environment for the script execution
-    # For actual deployment, manage API keys securely.
-    from dotenv import load_dotenv # Optional: if you use a .env file
+    from dotenv import load_dotenv
     load_dotenv() 
     
     OPENAI_API_KEY_FROM_ENV = os.getenv("OPENAI_API_KEY")
@@ -367,25 +378,27 @@ if __name__ == "__main__":
     if not OPENAI_API_KEY_FROM_ENV:
         logger.error("CRITICAL: OPENAI_API_KEY environment variable not set. This is required for querying. Exiting.")
         print("Please set the OPENAI_API_KEY environment variable to run this example.")
-        print("Example for bash/zsh: export OPENAI_API_KEY='your_key_here'")
-        print("Example for PowerShell: $env:OPENAI_API_KEY='your_key_here'")
         exit(1)
 
-    # Initialize Assistant (can pass API key here, or to each ask_question call)
-    assistant = HRAssistant(default_api_key=OPENAI_API_KEY_FROM_ENV)
+    # Initialize Assistant. For local testing, chroma_api_key and default_chat_api_key can be the same.
+    assistant = HRAssistant(
+        chroma_api_key=OPENAI_API_KEY_FROM_ENV,
+        default_chat_api_key=OPENAI_API_KEY_FROM_ENV 
+    )
     
     logger.info("\n--- HR Assistant Ready to Answer Questions ---")
     logger.info("Ensure 'loader.py' has been run to populate the knowledge base.")
 
     # --- Example Questions ---
     
-    # Example 1: General question in Spanish (assuming documents might contain benefit info)
+    # Example 1: General question in Spanish
     question1_es = "¿Cuáles son mis beneficios laborales según el Contrato Colectivo?"
     print(f"\nUser Query (español): {question1_es}")
     print("Assistant Response (streaming):")
     
-    response_gen1 = assistant.ask_question(question1_es, language='español') # API key from init
-    if isinstance(response_gen1, str): # Indicates an error message was returned
+    # In this local test, we don't pass chat_api_key, so it uses the default one from init.
+    response_gen1 = assistant.ask_question(question1_es, language='español') 
+    if isinstance(response_gen1, str):
         print(response_gen1)
     else:
         for chunk_content in response_gen1:
@@ -403,51 +416,5 @@ if __name__ == "__main__":
         for chunk_content in response_gen2:
             print(chunk_content, end="", flush=True)
         print("\n------------------------------------")
-
-    # Example 3: English question (assuming documents might contain vacation policy)
-    question3_en = "What is the company's vacation policy?"
-    print(f"\nUser Query (english): {question3_en}")
-    print("Assistant Response (streaming):")
-    response_gen3 = assistant.ask_question(question3_en, language='english')
-    if isinstance(response_gen3, str):
-        print(response_gen3)
-    else:
-        for chunk_content in response_gen3:
-            print(chunk_content, end="", flush=True)
-        print("\n------------------------------------")
-    
-    # Example 4: Question where context might not exist
-    question4_es = "¿Cuál es el menú de la cafetería para la próxima semana?"
-    print(f"\nUser Query (español): {question4_es}")
-    print("Assistant Response (streaming):")
-    response_gen4 = assistant.ask_question(question4_es, language='español')
-    if isinstance(response_gen4, str):
-        print(response_gen4)
-    else:
-        for chunk_content in response_gen4:
-            print(chunk_content, end="", flush=True)
-        print("\n------------------------------------")
         
-    # Example 5: Conversation history
-    # The HRAssistant class itself does not maintain conversation state between calls.
-    # The calling application needs to manage and pass the history.
-    # conversation_history_example = [
-    #     {'role': 'user', 'content': 'What are the main company holidays observed?'},
-    #     {'role': 'assistant', 'content': 'Based on the documents, the main company holidays include New Year Day, Revolution Day, and Christmas Day.'}
-    # ]
-    # question5_en = "Is Independence Day also a holiday?"
-    # print(f"\nUser Query (english) with history: {question5_en}")
-    # print("Assistant Response (streaming):")
-    # response_gen5 = assistant.ask_question(
-    #     question5_en,
-    #     language='english',
-    #     conversation_history=conversation_history_example
-    # )
-    # if isinstance(response_gen5, str):
-    #     print(response_gen5)
-    # else:
-    #     for chunk_content in response_gen5:
-    #         print(chunk_content, end="", flush=True)
-    #     print("\n------------------------------------")
-
     logger.info("HR Assistant example script finished.")
