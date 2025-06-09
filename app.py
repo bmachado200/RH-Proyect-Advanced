@@ -151,7 +151,12 @@ def ask_question_route():
 @app.route('/translate', methods=['POST'])
 def translate_text_route():
     """
+<<<<<<< HEAD
     Traduce un texto dado a un idioma objetivo usando OpenAI, transmitiendo la respuesta.
+=======
+    Translate a given text to a target language using OpenAI, streaming the response.
+    The source language can be provided or detected by the AI.
+>>>>>>> d3040a4b4227ba28a6e99808c9f67fdb8fd7213a
     """
     data = request.get_json()
     text_to_translate = data.get('text', '').strip()
@@ -173,13 +178,18 @@ def translate_text_route():
         return jsonify({'error': error_msg}), 401
 
     try:
+<<<<<<< HEAD
         translation_client = OpenAI(api_key=api_key_from_session, timeout=Timeout(45.0, connect=5.0))
+=======
+        translation_client = OpenAI(api_key=api_key_from_session)
+>>>>>>> d3040a4b4227ba28a6e99808c9f67fdb8fd7213a
         
         language_names_for_openai_prompt = {
             "english": "English", "spanish": "Spanish",
             "chinese_simplified": "Simplified Chinese", "chinese_traditional": "Traditional Chinese"
         }
         
+<<<<<<< HEAD
         prompt_target_language_name = language_names_for_openai_prompt.get(target_language_key, target_language_key.capitalize())
         
         if source_language_key and source_language_key in language_names_for_openai_prompt:
@@ -190,19 +200,55 @@ def translate_text_route():
         
         response_stream = translation_client.chat.completions.create(
             model=assistant.OPENAI_CHAT_MODEL if assistant else "gpt-4.1-mini-2025-04-14",
+=======
+        prompt_target_language_name = language_names_for_openai_prompt.get(
+            target_language_key, target_language_key.capitalize()
+        )
+        
+        if source_language_key and source_language_key in language_names_for_openai_prompt:
+            prompt_source_language_name = language_names_for_openai_prompt[source_language_key]
+            prompt_content = (
+                f"Translate the following text from {prompt_source_language_name} to {prompt_target_language_name}. "
+                f"Preserve all original formatting, including markdown, HTML tags, lists, newlines, and special characters. "
+                f"Respond ONLY with the translated text itself, without any surrounding text, explanations, or conversational remarks.\n\n"
+                f"Original text:\n{text_to_translate}"
+            )
+        else:
+            prompt_content = (
+                f"Detect the language of the following text and then translate it to {prompt_target_language_name}. "
+                f"Preserve all original formatting, including markdown, HTML tags, lists, newlines, and special characters. "
+                f"Respond ONLY with the translated text itself, without any surrounding text, explanations, or conversational remarks.\n\n"
+                f"Text to translate:\n{text_to_translate}"
+            )
+        
+        # The key change is to add stream=True
+        response_stream = translation_client.chat.completions.create(
+            model=assistant.OPENAI_CHAT_MODEL,
+>>>>>>> d3040a4b4227ba28a6e99808c9f67fdb8fd7213a
             messages=[
                 {"role": "system", "content": "You are a highly proficient multilingual translator. Your task is to translate text accurately, maintaining all original formatting. Respond only with the translation itself."},
                 {"role": "user", "content": prompt_content}
             ],
+<<<<<<< HEAD
             temperature=0.1, max_tokens=3500, stream=True
         )
 
         def generate_translation_stream():
             """Función generadora para transmitir la respuesta de traducción."""
+=======
+            temperature=0.1,
+            max_tokens=3500,
+            stream=True  # Enable streaming
+        )
+
+        def generate_translation_stream():
+            """Generator function to stream the translation response."""
+>>>>>>> d3040a4b4227ba28a6e99808c9f67fdb8fd7213a
             try:
                 for chunk in response_stream:
                     if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
                         token = chunk.choices[0].delta.content
+<<<<<<< HEAD
                         yield f"data: {json.dumps({'token': token})}\n\n"
             except Exception as stream_ex:
                 app.logger.error(f"Excepción durante la transmisión de la traducción: {str(stream_ex)}")
@@ -216,6 +262,25 @@ def translate_text_route():
         error_msg_server = f"Translation error: {str(e)}"
         if "authentication" in str(e).lower() or "api key" in str(e).lower():
              error_msg_server = "La traducción falló debido a una clave API inválida o un problema de autenticación."
+=======
+                        # Yield each token in the Server-Sent Events (SSE) format
+                        yield f"data: {json.dumps({'token': token})}\n\n"
+            except Exception as stream_ex:
+                app.logger.error(f"Exception during translation streaming: {str(stream_ex)}")
+            finally:
+                # Signal the end of the stream to the client
+                yield f"data: [DONE]\n\n"
+
+        # Return a streaming response
+        return Response(generate_translation_stream(), mimetype='text/event-stream')
+
+    except Exception as e:
+        app.logger.error(f"Translation API Error: {str(e)}", exc_info=True)
+        error_msg_server = f"Translation error: {str(e)}"
+        if "authentication" in str(e).lower() or "api key" in str(e).lower():
+             error_msg_server = "Translation failed due to an invalid API key or authentication issue. Please check your API key in Settings."
+        # This error will now be caught by the frontend's `.catch()` block
+>>>>>>> d3040a4b4227ba28a6e99808c9f67fdb8fd7213a
         return jsonify({'error': error_msg_server}), 500
 
 
