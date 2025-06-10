@@ -225,26 +225,56 @@ const languageOptions = document.getElementById('languageOptions'); // The div h
 let abortController = null;
 
 function initUI() {
-    welcomeTitle.textContent = translations[appLanguage].welcome;
-    chatBox.innerHTML = `<div class="loading-message">${translations[appLanguage].loading}</div>`;
+    // MODIFICATION: Add the new loader structure dynamically
+    const loadingContent = document.querySelector('.loading-content');
+    if (loadingContent) {
+        // Clear existing content (like the SVG logo) and add the new loader
+        loadingContent.innerHTML = `
+            <div class="robot-loader">
+                <div class="loader-spinner"></div>
+            </div>
+            <h1 id="welcomeTitle"></h1>
+            <p id="loadingSubtitle"></p>
+        `;
+    }
 
+    // Set the welcome text based on the default language.
+    const welcomeText = "Welcome"; // New robotic theme
+    const subtitleText = "Starting your HR assistant..."; // New robotic theme
+    
+    document.getElementById('welcomeTitle').textContent = welcomeText;
+    document.getElementById('loadingSubtitle').textContent = subtitleText;
+
+
+    // Main timeout to control the duration of the welcome screen.
     setTimeout(() => {
-        updateUIText();
-        chatBox.innerHTML = '';
-        addBotMessage(translations[appLanguage].greeting);
-        setTimeout(() => {
-            showSuggestedQuestions();
-        }, 500);
-
+        // 1. Start the fade-out of the loading screen.
         loadingScreen.style.opacity = '0';
+
+        // 2. Set a new timeout to run *after* the fade-out is complete.
         setTimeout(() => {
+            // 3. Hide the loading screen completely.
             loadingScreen.style.display = 'none';
             document.body.style.overflow = 'auto';
+
+            // 4. Make the main app container visible but start it as transparent.
             appContainer.style.display = 'flex';
             appContainer.style.opacity = '1';
-            animateUI();
-        }, 500);
-    }, 1000);
+
+            // 5. Trigger the main app's staggered animation.
+            animateAppEntry();
+
+            // 6. Prepare the chat content in the background.
+            updateUIText();
+            chatBox.innerHTML = '';
+            addBotMessage(translations[appLanguage].greeting);
+            setTimeout(() => {
+                showSuggestedQuestions();
+            }, 1000); // Delay suggested questions to appear after the main animations.
+
+        }, 500); // This must match the CSS transition time for the loading screen's opacity.
+
+    }, 2800); // Total time the welcome animation is visible.
 }
 
 function updateUIText() {
@@ -317,21 +347,21 @@ function showSuggestedQuestions() {
     }, 10);
 }
 
-function animateUI() {
-    const elementsToAnimate = [
-        { el: document.querySelector('.top-bar'), delay: 100 },
-        { el: document.querySelector('#chatTitle'), delay: 200 },
-        { el: document.querySelector('.chat-container'), delay: 300 },
-        { el: document.querySelector('.chat-box'), delay: 400 },
-        { el: document.querySelector('.input-area'), delay: 500 }
-    ];
-    elementsToAnimate.forEach(item => {
-        if (item.el) {
-            setTimeout(() => {
-                item.el.classList.add('visible');
-            }, item.delay);
-        }
-    });
+function animateAppEntry() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+
+    if (sidebar) {
+        // Start sidebar animation
+        sidebar.classList.add('visible');
+    }
+
+    if (mainContent) {
+        // Start main content animation after a short delay for a staggered effect
+        setTimeout(() => {
+            mainContent.classList.add('visible');
+        }, 200); // 200ms delay
+    }
 }
 
 function closeMobileSidebar() {
@@ -623,16 +653,15 @@ function addBotMessage(message, specialEffect = true) {
         if (specialEffect === false) {
             messageContent.innerHTML = message;
             chatBox.scrollTop = chatBox.scrollHeight;
-            messageElement.classList.add('reveal');
             if (message !== translations[appLanguage].greeting && !message.toLowerCase().includes("error")) {
-                messageContent.dataset.originalText = messageContent.innerHTML; // Store HTML if it contains formatting
+                messageContent.dataset.originalText = messageContent.innerHTML;
                 createMessageTranslationDropdown(messageElement);
             }
         } else {
             let i = 0;
             const baseSpeed = 20;
             const lengthFactor = Math.max(0, Math.min(15, message.length / 20));
-            const typingSpeed = Math.max(5, baseSpeed - lengthFactor); // Ensure speed is not too fast or zero
+            const typingSpeed = Math.max(5, baseSpeed - lengthFactor);
 
             function typingEffect() {
                 if (i < message.length) {
@@ -640,10 +669,9 @@ function addBotMessage(message, specialEffect = true) {
                     chatBox.scrollTop = chatBox.scrollHeight;
                     setTimeout(typingEffect, typingSpeed);
                 } else {
-                    messageElement.classList.add('reveal');
                     chatBox.scrollTop = chatBox.scrollHeight;
                     if (message !== translations[appLanguage].greeting) {
-                        messageContent.dataset.originalText = messageContent.innerHTML; // Store after typing
+                        messageContent.dataset.originalText = messageContent.innerHTML;
                         createMessageTranslationDropdown(messageElement);
                     }
                 }
@@ -695,9 +723,9 @@ function sendMessage() {
     const messageTextElement = document.createElement('div');
     messageTextElement.className = 'message-text';
     messageTextElement.innerHTML = `
-        <div class="typing-indicator-inline">
-            <div class="typing-dots"><span></span><span></span><span></span></div>
-            <div class="typing-text">${translations[appLanguage].typing}</div>
+        <div class="generating-indicator">
+            <div class="generating-loader"></div>
+            <div class="generating-text">${translations[appLanguage].typing}</div>
         </div>
     `;
     botResponseContainer.appendChild(messageTextElement);
@@ -727,7 +755,7 @@ function sendMessage() {
             reader.read().then(({ done, value }) => {
                 if (done) {
                     botResponseContainer.classList.remove('streaming');
-                    messageTextElement.dataset.originalText = fullStreamedResponse; // Store full response
+                    messageTextElement.dataset.originalText = fullStreamedResponse;
                     createMessageTranslationDropdown(botResponseContainer);
                     chatBox.scrollTop = chatBox.scrollHeight;
                     return;
@@ -749,7 +777,6 @@ function sendMessage() {
                             if (data.error) {
                                 console.error("Server error during stream:", data.error);
                                 messageTextElement.innerHTML += `<br><span class="stream-error">Error: ${data.error}</span>`;
-                                chatBox.scrollTop = chatBox.scrollHeight;
                             }
                         } catch (e) { console.error("Error parsing stream data:", e, "Line:", line); }
                     }
@@ -806,7 +833,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     userInput.addEventListener('input', () => {
-        // Only enable send button if not currently generating a response
         if (sendButton.style.display !== 'none') {
             sendButton.disabled = userInput.value.trim().length === 0;
         }

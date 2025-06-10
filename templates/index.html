@@ -7,10 +7,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <!-- ANIMATION: Updated Loading Screen Structure -->
     <div id="loadingScreen" class="loading">
-        <div class="spinner"></div>
-        <p id="welcomeTitle">Loading HR Assistant...</p>
+        <div class="loading-content">
+            <!-- You can replace this SVG with your own logo -->
+            <svg class="logo" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48"><path d="M320-240h320v-80H320v80Zm0-160h320v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h480q33 0 56.5 23.5T800-800v640q0 33-23.5 56.5T720-80H240Zm0-80h480v-640H240v640Z"/></svg>
+            <h1 id="welcomeTitle">Welcome to HR Assistant</h1>
+            <p id="loadingSubtitle">Loading your personal assistant...</p>
+        </div>
     </div>
+    <!-- END of Updated Loading Screen -->
 
     <div id="appContainer">
         <div class="sidebar">
