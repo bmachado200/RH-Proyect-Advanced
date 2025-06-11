@@ -5,7 +5,7 @@ const translations = {
         sidebarTitle: "Welcome!",
         mobileMenuTitle: "Menu",
         welcomeMessage: "Oficial AI HR Chatbot",
-        placeholder: "Type your question here...",
+        placeholder: "Type your question here or use the microphone...",
         send: "Send",
         greeting: "Hello! I'm your HR Assistant. How can I help you today? 🤖",
         noQuestion: "Please enter a question",
@@ -27,6 +27,8 @@ const translations = {
         suggestedTitle: "Try asking:",
         helpButtonText: "Help",
         settingsButtonText: "Settings",
+        themeButtonDark: "Dark Mode",
+        themeButtonLight: "Light Mode",
         translating: "Translating...",
         settingsTitle: "Settings",
         apiKeyLabel: "OpenAI API Key",
@@ -44,7 +46,7 @@ const translations = {
         sidebarTitle: "¡Bienvenido!",
         mobileMenuTitle: "Menú",
         welcomeMessage: "AI Chat Oficial de RH",
-        placeholder: "Escribe tu pregunta aquí...",
+        placeholder: "Escribe tu pregunta aquí o usa el micrófono...",
         send: "Enviar",
         greeting: "¡Hola! Soy tu asistente de Recursos Humanos. ¿En qué puedo ayudarte hoy? 🤖",
         noQuestion: "Por favor ingresa una pregunta",
@@ -66,6 +68,8 @@ const translations = {
         suggestedTitle: "Prueba preguntando:",
         helpButtonText: "Ayuda",
         settingsButtonText: "Configuración",
+        themeButtonDark: "Modo Oscuro",
+        themeButtonLight: "Modo Claro",
         translating: "Traduciendo...",
         settingsTitle: "Configuración",
         apiKeyLabel: "Clave API de OpenAI",
@@ -83,7 +87,7 @@ const translations = {
         sidebarTitle: "欢迎!",
         mobileMenuTitle: "菜单",
         welcomeMessage: "官方AI人力资源聊天机器人",
-        placeholder: "在此输入您的问题...",
+        placeholder: "在此输入您的问题或使用麦克风...",
         send: "发送",
         greeting: "你好！我是你的人力资源助理。今天我能帮你做些什么？🤖 (简体)",
         noQuestion: "请输入一个问题 (简体)",
@@ -105,6 +109,8 @@ const translations = {
         suggestedTitle: "尝试提问: (简体)",
         helpButtonText: "帮助 (简体)",
         settingsButtonText: "设置 (简体)",
+        themeButtonDark: "深色模式 (简体)",
+        themeButtonLight: "浅色模式 (简体)",
         translating: "翻译中... (简体)",
         settingsTitle: "设置 (简体)",
         apiKeyLabel: "OpenAI API 密钥 (简体)",
@@ -122,7 +128,7 @@ const translations = {
         sidebarTitle: "歡迎!",
         mobileMenuTitle: "選單",
         welcomeMessage: "官方AI人力資源聊天機器人",
-        placeholder: "在此輸入您的問題...",
+        placeholder: "在此輸入您的問題或使用麥克風...",
         send: "傳送",
         greeting: "你好！我是您的人力資源助理。今天我能幫您做些什麼？🤖 (繁體)",
         noQuestion: "請輸入一個問題 (繁體)",
@@ -144,6 +150,8 @@ const translations = {
         suggestedTitle: "嘗試提問: (繁體)",
         helpButtonText: "協助 (繁體)",
         settingsButtonText: "設定 (繁體)",
+        themeButtonDark: "深色模式 (繁體)",
+        themeButtonLight: "淺色模式 (繁體)",
         translating: "翻譯中... (繁體)",
         settingsTitle: "設定 (繁體)",
         apiKeyLabel: "OpenAI API 金鑰 (繁體)",
@@ -197,6 +205,7 @@ const chatTitle = document.getElementById('chatTitle');
 const userInput = document.getElementById('userInput');
 const sendButton = document.getElementById('sendButton');
 const stopButton = document.getElementById('stopButton');
+const micButton = document.getElementById('micButton'); // Mic button
 const chatBox = document.getElementById('chatBox');
 const loadingScreen = document.getElementById('loadingScreen');
 const appContainer = document.getElementById('appContainer');
@@ -215,6 +224,9 @@ const clearKeyButton = document.getElementById('clearKeyButton');
 const mobileSidebarHeaderTitle = document.getElementById('mobileSidebarHeaderTitle');
 const hamburgerButton = document.querySelector('.hamburger');
 const sidebarElement = document.querySelector('.sidebar');
+const themeToggleButton = document.getElementById('themeToggleButton');
+const themeIcon = document.getElementById('themeIcon');
+const themeButtonText = document.getElementById('themeButtonText');
 
 const languageButtonContainer = document.getElementById('languageButtonContainer'); // The div container
 const currentLanguageDisplay = document.getElementById('currentLanguageDisplay'); // The button part of the dropdown
@@ -224,7 +236,80 @@ const languageOptions = document.getElementById('languageOptions'); // The div h
 // Global variable to hold the AbortController
 let abortController = null;
 
+// --- SPEECH RECOGNITION SETUP ---
+let isRecording = false;
+let recognition;
+let finalTranscript = ''; // Variable to store the accumulated final transcript
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
+        }
+        userInput.value = finalTranscript + interimTranscript;
+        sendButton.disabled = userInput.value.trim().length === 0;
+    };
+    
+    recognition.onend = () => {
+        isRecording = false;
+        micButton.classList.remove('recording');
+        micButton.title = "Use Microphone";
+    };
+
+    recognition.onerror = (event) => {
+        console.error("Speech recognition error", event.error);
+        alert(`Speech recognition error: ${event.error}. Please ensure microphone access is allowed.`);
+        micButton.classList.remove('recording');
+        isRecording = false;
+    };
+
+} else {
+    console.warn("Speech Recognition not supported in this browser.");
+    if(micButton) micButton.style.display = 'none';
+}
+// --- END OF SPEECH RECOGNITION SETUP ---
+
+function setInitialTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeIcon.textContent = '☀️';
+        if (themeButtonText) themeButtonText.textContent = translations[appLanguage].themeButtonLight;
+    } else {
+        document.body.classList.remove('dark-mode');
+        themeIcon.textContent = '🌙';
+        if (themeButtonText) themeButtonText.textContent = translations[appLanguage].themeButtonDark;
+    }
+}
+
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    let currentTheme;
+    if (document.body.classList.contains('dark-mode')) {
+        themeIcon.textContent = '☀️';
+        themeButtonText.textContent = translations[appLanguage].themeButtonLight;
+        currentTheme = 'dark';
+    } else {
+        themeIcon.textContent = '🌙';
+        themeButtonText.textContent = translations[appLanguage].themeButtonDark;
+        currentTheme = 'light';
+    }
+    localStorage.setItem('theme', currentTheme);
+}
+
 function initUI() {
+    setInitialTheme();
     // MODIFICATION: Add the new loader structure dynamically
     const loadingContent = document.querySelector('.loading-content');
     if (loadingContent) {
@@ -289,6 +374,12 @@ function updateUIText() {
     welcomeMessage.textContent = lang.welcomeMessage;
     helpButtonText.textContent = lang.helpButtonText;
     settingsButtonText.textContent = lang.settingsButtonText;
+
+    if (document.body.classList.contains('dark-mode')) {
+        themeButtonText.textContent = lang.themeButtonLight;
+    } else {
+        themeButtonText.textContent = lang.themeButtonDark;
+    }
     
     if (languageButtonText) languageButtonText.textContent = lang.currentLanguageText;
     if (currentLanguageDisplay) currentLanguageDisplay.title = lang.languageButton;
@@ -378,6 +469,19 @@ function switchAppLanguage(newLang) {
     }
     closeMobileSidebar();
     appLanguage = newLang;
+
+    // Update speech recognition language
+    if (recognition) {
+        const langMap = {
+            english: 'en-US',
+            spanish: 'es-MX',
+            chinese_simplified: 'zh-CN',
+            chinese_traditional: 'zh-TW'
+        };
+        recognition.lang = langMap[newLang] || 'en-US';
+        console.log(`Speech recognition language set to: ${recognition.lang}`);
+    }
+
     updateUIText();
     chatBox.innerHTML = '';
     addBotMessage(translations[appLanguage].greeting);
@@ -854,6 +958,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Event listener for the microphone button
+    if (micButton && recognition) {
+        micButton.addEventListener('click', () => {
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                try {
+                    finalTranscript = '';
+                    userInput.value = '';
+                    recognition.start();
+                    isRecording = true;
+                    micButton.classList.add('recording');
+                    micButton.title = "Stop Recording";
+                } catch(e) {
+                    console.error("Could not start recognition", e);
+                }
+            }
+        });
+    }
+
     if (currentLanguageDisplay && languageOptions) {
         currentLanguageDisplay.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -865,6 +989,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 switchAppLanguage(e.target.dataset.lang);
             }
         });
+    }
+
+    if (themeToggleButton) {
+        themeToggleButton.addEventListener('click', toggleTheme);
     }
 
     helpButton.addEventListener('click', openHelpModal);
