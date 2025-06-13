@@ -54,6 +54,8 @@ body.modal-open {
     transform: translateX(-100%);
     /* Smooth transition for transform and opacity */
     transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease, background-color 0.3s;
+    overflow: visible; /* <-- AÑADE ESTA LÍNEA */
+
 }
 .sidebar.visible {
     opacity: 1;
@@ -153,13 +155,14 @@ body.modal-open {
 .language-dropdown .dropdown-content {
     display: none;
     position: absolute;
-    background-color: #2545a5; /* Darker blue */
-    min-width: calc(100% - 0px); /* Match button width if padding is 0 on content */
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    background-color: #2545a5;
+    min-width: 180px; /* Un ancho adecuado para los idiomas */
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2); /* Sombra hacia arriba */
     z-index: 101; 
     border-radius: 4px;
-    bottom: calc(100% + 5px); /* Position above the button */
-    left: 0; 
+    bottom: calc(100% + 5px); /* <-- MODIFICADO: Posiciona el menú 5px por ENCIMA del botón */
+    right: 0;                 /* <-- MODIFICADO: Alinea el menú a la DERECHA del contenedor del botón */
+    /* left: ...; */          /* <-- La propiedad 'left' se elimina para que 'right' tenga efecto */
     box-sizing: border-box;
 }
 
@@ -249,19 +252,25 @@ body.modal-open {
     animation: slideInFromRight 0.4s ease-out forwards;
 }
 
+/* ---- MODIFICADO ---- */
 .bot-message {
     background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     border-left: 4px solid #2f55d1;
     margin-right: auto;
     margin-left: 0;
-    border-bottom-left-radius: 4px; /* Keep consistent with border */
-    border-top-left-radius: 4px; /* Keep consistent with border */
+    border-radius: 18px; /* Hacemos todos los bordes iguales para consistencia */
+    border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
     color: #333;
     align-self: flex-start;
-    padding: 15px 20px;
+    padding: 15px; /* Ajustamos el padding */
     animation: slideInFromLeft 0.4s ease-out forwards;
     transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    display: flex; /* <-- AÑADIDO: Habilita Flexbox */
+    align-items: flex-start; /* <-- AÑADIDO: Alinea texto y botones arriba */
+    gap: 10px; /* <-- AÑADIDO: Espacio entre el texto y los botones */
+    flex-direction: column; /* <-- AÑADE ESTA LÍNEA */
 }
 
 /* Translation Buttons and Dropdown for Messages */
@@ -1066,4 +1075,49 @@ body.dark-mode .translate-dropdown-options a {
 }
 body.dark-mode .translate-dropdown-options a:hover {
     background-color: #4a4a4a;
+}
+
+.action-buttons-container {
+    opacity: 1; 
+    transition: opacity 0.2s ease-in-out;
+    z-index: 2;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0; 
+    align-self: flex-end; /* <-- AÑADE ESTA LÍNEA */
+}
+
+.bot-message:hover .action-buttons-container,
+.bot-message .action-buttons-container.persistent {
+    opacity: 1;
+}
+
+/* Estilo base para todos los botones de acción */
+.message-action-button {
+    background: rgba(47, 85, 209, 0.1);
+    color: #2f55d1;
+    border: 1px solid rgba(47, 85, 209, 0.3);
+    border-radius: 15px;
+    padding: 5px;
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.message-action-button:hover {
+    background: #2f55d1;
+    color: white;
+    border-color: #2f55d1;
+}
+
+.message-action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

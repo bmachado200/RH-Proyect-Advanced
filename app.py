@@ -221,6 +221,78 @@ def clear_conversation_route():
     response_message = message_map.get(language, message_map['english'])
     return jsonify({'status': 'success', 'message': response_message})
 
+@app.route('/summarize', methods=['POST'])
+def summarize_text_route():
+    """
+    Summarizes a given text using the OpenAI API and streams the result in the correct language.
+    """
+    data = request.get_json()
+    text_to_summarize = data.get('text', '').strip()
+    language = data.get('language', 'spanish') 
+    api_key_from_session = session.get('openai_api_key')
+
+    if not text_to_summarize:
+        return jsonify({'error': 'No text provided for summarization.'}), 400
+
+    if not api_key_from_session:
+        return jsonify({'error': 'API key not configured. Please set it in Settings.'}), 401
+    
+    # --- CAMBIO: Instrucciones más explícitas y directas ---
+    prompts = {
+        'english': {
+            'system': "You are an expert assistant at summarizing information clearly and concisely.",
+            'user': "Provide a clear and concise summary of the following text. The summary MUST be written in English.\n\nOriginal text:\n"
+        },
+        'spanish': {
+            'system': "Eres un asistente experto en resumir información de manera clara y concisa.",
+            'user': "Proporciona un resumen conciso y claro del siguiente texto. El resumen DEBE estar escrito en Español.\n\nTexto original:\n"
+        },
+        'chinese_simplified': {
+            'system': "您是一位精通清晰简洁总结信息的专家助理。",
+            'user': "请对以下文本进行清晰简洁的总结。该总结必须用简体中文书写。\n\n原文：\n"
+        },
+        'chinese_traditional': {
+            'system': "您是一位精通清晰簡潔總結資訊的專家助理。",
+            'user': "請對以下文本進行清晰簡潔的總結。該總結必須用繁體中文書寫。\n\n原文：\n"
+        }
+    }
+
+    selected_prompt = prompts.get(language, prompts['spanish'])
+
+    try:
+        summary_client = OpenAI(api_key=api_key_from_session, timeout=Timeout(45.0, connect=5.0))
+        prompt_content = f"{selected_prompt['user']}{text_to_summarize}"
+        
+        response_stream = summary_client.chat.completions.create(
+            model="gpt-4.1-mini-2025-04-14",
+            messages=[
+                {"role": "system", "content": selected_prompt['system']},
+                {"role": "user", "content": prompt_content}
+            ],
+            temperature=0.2,
+            max_tokens=500,
+            stream=True
+        )
+
+        def generate_summary_stream():
+            try:
+                for chunk in response_stream:
+                    if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
+                        token = chunk.choices[0].delta.content
+                        yield f"data: {json.dumps({'token': token})}\n\n"
+            except Exception as stream_ex:
+                app.logger.error(f"Exception during summary streaming: {str(stream_ex)}")
+                error_data = json.dumps({'error': f"Stream Error: {stream_ex}"})
+                yield f"data: {error_data}\n\n"
+            finally:
+                yield f"data: [DONE]\n\n"
+
+        return Response(generate_summary_stream(), mimetype='text/event-stream')
+
+    except Exception as e:
+        app.logger.error(f"Summarization API Error: {str(e)}", exc_info=True)
+        return jsonify({'error': f"Summarization error: {str(e)}"}), 500
+
 if __name__ == '__main__':
     # Get Flask settings from environment variables with defaults
     flask_debug = os.getenv("FLASK_DEBUG", "true").lower() in ['true', '1', 't']

@@ -23,7 +23,7 @@ const translations = {
         helpItem2: "Explain HR policies and procedures",
         helpItem3: "Provide information about benefits",
         helpItem4: "Clarify work regulations",
-        helpLanguage: "The assistant supports English, Spanish, Simplified Chinese, and Traditional Chinese.", // Updated
+        helpLanguage: "The assistant supports English, Spanish, Simplified Chinese, and Traditional Chinese.",
         suggestedTitle: "Try asking:",
         helpButtonText: "Help",
         settingsButtonText: "Settings",
@@ -39,7 +39,8 @@ const translations = {
         settingsText: "Enter your OpenAI API key to use this service. Your key will be stored securely in your session.",
         clearKey: "Clear Key",
         translateToLabel: "Translate to:",
-        translationToggleTitle: "Translate message"
+        translationToggleTitle: "Translate message",
+        summaryModalTitle: "Summary of Message" // <-- AÑADIDO
     },
     spanish: {
         title: "💬 Asistente de RH",
@@ -64,7 +65,7 @@ const translations = {
         helpItem2: "Explicar políticas y procedimientos de RH",
         helpItem3: "Proveer información sobre beneficios",
         helpItem4: "Aclarar regulaciones laborales",
-        helpLanguage: "El asistente soporta inglés, español, chino simplificado y chino tradicional.", // Updated
+        helpLanguage: "El asistente soporta inglés, español, chino simplificado y chino tradicional.",
         suggestedTitle: "Prueba preguntando:",
         helpButtonText: "Ayuda",
         settingsButtonText: "Configuración",
@@ -80,7 +81,8 @@ const translations = {
         settingsText: "Ingresa tu clave API de OpenAI para usar este servicio. Tu clave se almacenará de forma segura en tu sesión.",
         clearKey: "Borrar Clave",
         translateToLabel: "Traducir a:",
-        translationToggleTitle: "Traducir mensaje"
+        translationToggleTitle: "Traducir mensaje",
+        summaryModalTitle: "Resumen del Mensaje" // <-- AÑADIDO
     },
     chinese_simplified: {
         title: "💬 人力资源助理",
@@ -121,7 +123,8 @@ const translations = {
         settingsText: "输入您的 OpenAI API 密钥以使用此服务。您的密钥将安全地存储在您的会话中。(简体)",
         clearKey: "清除密钥 (简体)",
         translateToLabel: "翻译成: (简体)",
-        translationToggleTitle: "翻译消息 (简体)"
+        translationToggleTitle: "翻译消息 (简体)",
+        summaryModalTitle: "消息摘要 (简体)" // <-- AÑADIDO
     },
     chinese_traditional: {
         title: "💬 人力資源助理",
@@ -150,7 +153,7 @@ const translations = {
         suggestedTitle: "嘗試提問: (繁體)",
         helpButtonText: "協助 (繁體)",
         settingsButtonText: "設定 (繁體)",
-        themeButtonDark: "深色模式 (繁體)",
+        themeButtonDark: "深色模式 (繁体)",
         themeButtonLight: "淺色模式 (繁體)",
         translating: "翻譯中... (繁體)",
         settingsTitle: "設定 (繁體)",
@@ -162,7 +165,8 @@ const translations = {
         settingsText: "輸入您的 OpenAI API 金鑰以使用此服務。您的金鑰將安全地儲存在您的會話中。(繁體)",
         clearKey: "清除金鑰 (繁體)",
         translateToLabel: "翻譯成: (繁體)",
-        translationToggleTitle: "翻譯訊息 (繁體)"
+        translationToggleTitle: "翻譯訊息 (繁體)",
+        summaryModalTitle: "訊息摘要 (繁體)" // <-- AÑADIDO
     }
 };
 
@@ -310,10 +314,8 @@ function toggleTheme() {
 
 function initUI() {
     setInitialTheme();
-    // MODIFICATION: Add the new loader structure dynamically
     const loadingContent = document.querySelector('.loading-content');
     if (loadingContent) {
-        // Clear existing content (like the SVG logo) and add the new loader
         loadingContent.innerHTML = `
             <div class="robot-loader">
                 <div class="loader-spinner"></div>
@@ -323,43 +325,32 @@ function initUI() {
         `;
     }
 
-    // Set the welcome text based on the default language.
-    const welcomeText = "Welcome"; // New robotic theme
-    const subtitleText = "Starting your HR assistant..."; // New robotic theme
+    const welcomeText = "Welcome";
+    const subtitleText = "Starting your HR assistant...";
     
     document.getElementById('welcomeTitle').textContent = welcomeText;
     document.getElementById('loadingSubtitle').textContent = subtitleText;
 
 
-    // Main timeout to control the duration of the welcome screen.
     setTimeout(() => {
-        // 1. Start the fade-out of the loading screen.
         loadingScreen.style.opacity = '0';
 
-        // 2. Set a new timeout to run *after* the fade-out is complete.
         setTimeout(() => {
-            // 3. Hide the loading screen completely.
             loadingScreen.style.display = 'none';
             document.body.style.overflow = 'auto';
-
-            // 4. Make the main app container visible but start it as transparent.
             appContainer.style.display = 'flex';
             appContainer.style.opacity = '1';
-
-            // 5. Trigger the main app's staggered animation.
             animateAppEntry();
-
-            // 6. Prepare the chat content in the background.
             updateUIText();
             chatBox.innerHTML = '';
             addBotMessage(translations[appLanguage].greeting);
             setTimeout(() => {
                 showSuggestedQuestions();
-            }, 1000); // Delay suggested questions to appear after the main animations.
+            }, 1000);
 
-        }, 500); // This must match the CSS transition time for the loading screen's opacity.
+        }, 500);
 
-    }, 2800); // Total time the welcome animation is visible.
+    }, 2800);
 }
 
 function updateUIText() {
@@ -399,6 +390,9 @@ function updateUIText() {
     apiKeyInput.placeholder = lang.apiKeyPlaceholder;
     saveSettingsButton.textContent = lang.saveSettings;
     clearKeyButton.textContent = lang.clearKey;
+
+    // --- AÑADIDO: Actualiza el título del modal de resumen ---
+    document.getElementById('summaryModalTitle').textContent = lang.summaryModalTitle;
 
     const langOptionsLinks = languageOptions.querySelectorAll('a[data-lang]');
     langOptionsLinks.forEach(link => {
@@ -443,15 +437,13 @@ function animateAppEntry() {
     const mainContent = document.querySelector('.main-content');
 
     if (sidebar) {
-        // Start sidebar animation
         sidebar.classList.add('visible');
     }
 
     if (mainContent) {
-        // Start main content animation after a short delay for a staggered effect
         setTimeout(() => {
             mainContent.classList.add('visible');
-        }, 200); // 200ms delay
+        }, 200);
     }
 }
 
@@ -470,7 +462,6 @@ function switchAppLanguage(newLang) {
     closeMobileSidebar();
     appLanguage = newLang;
 
-    // Update speech recognition language
     if (recognition) {
         const langMap = {
             english: 'en-US',
@@ -578,20 +569,19 @@ function clearApiKey() {
     });
 }
 
+function createMessageActionButtons(messageElement) {
+    const existingContainer = messageElement.querySelector('.action-buttons-container');
+    if (existingContainer) existingContainer.remove();
 
-function createMessageTranslationDropdown(messageElement) {
-    const existingDropdownContainer = messageElement.querySelector('.translation-buttons');
-    if (existingDropdownContainer) existingDropdownContainer.remove(); // Remove old one
-
-    const translationButtonsContainer = document.createElement('div');
-    translationButtonsContainer.className = 'translation-buttons persistent';
+    const actionButtonsContainer = document.createElement('div');
+    actionButtonsContainer.className = 'action-buttons-container persistent';
 
     const dropdownContainer = document.createElement('div');
     dropdownContainer.className = 'message-translation-dropdown';
 
     const toggleButton = document.createElement('button');
-    toggleButton.className = 'translate-dropdown-toggle';
-    toggleButton.innerHTML = '🌐'; 
+    toggleButton.className = 'translate-dropdown-toggle message-action-button';
+    toggleButton.innerHTML = '🌐';
     toggleButton.title = translations[appLanguage].translationToggleTitle;
 
     const optionsDiv = document.createElement('div');
@@ -617,25 +607,36 @@ function createMessageTranslationDropdown(messageElement) {
             optionsDiv.appendChild(optionLink);
         }
     }
-
-    if (optionsCount === 0) return; // No languages to translate to, so don't add dropdown
-
-    dropdownContainer.appendChild(toggleButton);
-    dropdownContainer.appendChild(optionsDiv);
-
-    toggleButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.querySelectorAll('.translate-dropdown-options.show').forEach(openDropdown => {
-            if (openDropdown !== optionsDiv) {
-                openDropdown.classList.remove('show');
-            }
-        });
-        optionsDiv.classList.toggle('show');
-    });
     
-    translationButtonsContainer.appendChild(dropdownContainer);
-    messageElement.appendChild(translationButtonsContainer);
+    if (optionsCount > 0) {
+        dropdownContainer.appendChild(toggleButton);
+        dropdownContainer.appendChild(optionsDiv);
+        actionButtonsContainer.appendChild(dropdownContainer);
+        
+        toggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.translate-dropdown-options.show').forEach(openDropdown => {
+                if (openDropdown !== optionsDiv) {
+                    openDropdown.classList.remove('show');
+                }
+            });
+            optionsDiv.classList.toggle('show');
+        });
+    }
+
+    const summarizeButton = document.createElement('button');
+    summarizeButton.className = 'summarize-button message-action-button';
+    summarizeButton.innerHTML = '📄';
+    summarizeButton.title = 'Resumir este mensaje';
+    summarizeButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        summarizeMessage(messageElement);
+    });
+
+    actionButtonsContainer.appendChild(summarizeButton);
+    messageElement.appendChild(actionButtonsContainer);
 }
+
 
 function translateMessage(messageElement, targetLanguage) {
     const messageTextElement = messageElement.querySelector('.message-text');
@@ -659,7 +660,7 @@ function translateMessage(messageElement, targetLanguage) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'text/event-stream' // Important: Accept event stream
+            'Accept': 'text/event-stream'
         },
         body: JSON.stringify({
             text: textToTranslate,
@@ -669,13 +670,11 @@ function translateMessage(messageElement, targetLanguage) {
     })
     .then(response => {
         if (!response.ok) {
-            // Handle HTTP errors (like 401, 500) which won't be part of the stream
             return response.json().then(errData => {
                 throw new Error(errData.error || `HTTP error! status: ${response.status}`);
             });
         }
 
-        // Clear the "Translating..." message and prepare for the new content
         messageTextElement.innerHTML = '';
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -685,28 +684,23 @@ function translateMessage(messageElement, targetLanguage) {
         function readStream() {
             reader.read().then(({ done, value }) => {
                 if (done) {
-                    // Stream finished
                     delete messageTextElement.dataset.translationInProgress;
                     if (toggleButton) toggleButton.disabled = false;
-                    
-                    // Store the final translated content as the new original for this message
                     messageTextElement.dataset.originalText = fullTranslatedResponse;
                     messageElement.dataset.currentLanguage = targetLanguage;
-                    
-                    // Re-create the dropdown with updated language options
-                    createMessageTranslationDropdown(messageElement);
+                    createMessageActionButtons(messageElement);
                     return;
                 }
 
                 partialData += decoder.decode(value, { stream: true });
                 const lines = partialData.split('\n\n');
-                partialData = lines.pop(); // Keep the last, potentially incomplete, line
+                partialData = lines.pop();
 
                 lines.forEach(line => {
                     if (line.startsWith('data: ')) {
                         try {
                             const jsonData = line.substring(6);
-                            if (jsonData.trim() === "[DONE]") return; // End of stream signal
+                            if (jsonData.trim() === "[DONE]") return;
                             
                             const data = JSON.parse(jsonData);
                             if (data.token) {
@@ -723,10 +717,10 @@ function translateMessage(messageElement, targetLanguage) {
                     }
                 });
                 
-                return readStream(); // Continue reading the stream
+                return readStream();
             }).catch(streamError => {
                 console.error('Translation stream reading error:', streamError);
-                messageTextElement.innerHTML = messageTextElement.dataset.originalText; // Restore original on error
+                messageTextElement.innerHTML = messageTextElement.dataset.originalText;
                 delete messageTextElement.dataset.translationInProgress;
                 if (toggleButton) toggleButton.disabled = false;
             });
@@ -735,12 +729,112 @@ function translateMessage(messageElement, targetLanguage) {
     })
     .catch(error => {
         console.error('Translation fetch failed:', error);
-        // Restore the original text if the fetch fails
         messageTextElement.innerHTML = messageTextElement.dataset.originalText || "Error during translation.";
         delete messageTextElement.dataset.translationInProgress;
         if (toggleButton) toggleButton.disabled = false;
     });
 }
+
+function summarizeMessage(messageElement) {
+    const messageTextElement = messageElement.querySelector('.message-text');
+    const originalText = messageTextElement.dataset.originalText || messageTextElement.innerHTML;
+    // --- AÑADIDO: Obtiene el idioma del mensaje para enviarlo al backend ---
+    const textLanguage = messageElement.dataset.currentLanguage || appLanguage;
+
+    const summaryModal = document.getElementById('summaryModal');
+    const summaryModalBody = document.getElementById('summaryModalBody');
+    const closeButton = summaryModal.querySelector('.close-modal');
+
+    summaryModalBody.textContent = translations[appLanguage].typing;
+    summaryModal.style.display = 'flex';
+    setTimeout(() => summaryModal.classList.add('visible'), 10);
+
+    const closeModal = () => {
+        summaryModal.classList.remove('visible');
+        setTimeout(() => {
+            summaryModal.style.display = 'none';
+            closeButton.onclick = null;
+            window.onclick = null;
+        }, 300);
+    };
+
+    closeButton.onclick = closeModal;
+    window.onclick = (event) => {
+        if (event.target == summaryModal) {
+            closeModal();
+        }
+    };
+
+    fetch('/summarize', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'text/event-stream'
+        },
+        // --- MODIFICADO: Envía el idioma del texto al backend ---
+        body: JSON.stringify({ 
+            text: originalText,
+            language: textLanguage 
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let partialData = '';
+        let isFirstToken = true;
+
+        function readStream() {
+            reader.read().then(({ done, value }) => {
+                if (done) {
+                    return;
+                }
+
+                partialData += decoder.decode(value, { stream: true });
+                const lines = partialData.split('\n\n');
+                partialData = lines.pop();
+
+                lines.forEach(line => {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const jsonData = line.substring(6);
+                            if (jsonData.trim() === "[DONE]") {
+                                return;
+                            }
+                            
+                            const data = JSON.parse(jsonData);
+                            
+                            if (data.token) {
+                                if (isFirstToken) {
+                                    summaryModalBody.innerHTML = '';
+                                    isFirstToken = false;
+                                }
+                                summaryModalBody.innerHTML += data.token;
+                            }
+                            if (data.error) {
+                                summaryModalBody.innerHTML = `<span class="stream-error">Error: ${data.error}</span>`;
+                            }
+                        } catch (e) {
+                            console.error("Error parsing stream data:", e, "Line:", line);
+                        }
+                    }
+                });
+                
+                return readStream();
+            });
+        }
+        
+        return readStream();
+    })
+    .catch(error => {
+        console.error('Summarization fetch failed:', error);
+        summaryModalBody.textContent = `Error al conectar con el servidor: ${error.message}`;
+    });
+}
+
 
 function addBotMessage(message, specialEffect = true) {
     const messageElement = document.createElement('div');
@@ -759,7 +853,7 @@ function addBotMessage(message, specialEffect = true) {
             chatBox.scrollTop = chatBox.scrollHeight;
             if (message !== translations[appLanguage].greeting && !message.toLowerCase().includes("error")) {
                 messageContent.dataset.originalText = messageContent.innerHTML;
-                createMessageTranslationDropdown(messageElement);
+                createMessageActionButtons(messageElement);
             }
         } else {
             let i = 0;
@@ -776,7 +870,7 @@ function addBotMessage(message, specialEffect = true) {
                     chatBox.scrollTop = chatBox.scrollHeight;
                     if (message !== translations[appLanguage].greeting) {
                         messageContent.dataset.originalText = messageContent.innerHTML;
-                        createMessageTranslationDropdown(messageElement);
+                        createMessageActionButtons(messageElement);
                     }
                 }
             }
@@ -860,7 +954,7 @@ function sendMessage() {
                 if (done) {
                     botResponseContainer.classList.remove('streaming');
                     messageTextElement.dataset.originalText = fullStreamedResponse;
-                    createMessageTranslationDropdown(botResponseContainer);
+                    createMessageActionButtons(botResponseContainer);
                     chatBox.scrollTop = chatBox.scrollHeight;
                     return;
                 }
@@ -958,7 +1052,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event listener for the microphone button
     if (micButton && recognition) {
         micButton.addEventListener('click', () => {
             if (isRecording) {
@@ -1011,6 +1104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  dropdown.classList.remove('show');
             }
         });
+
         if (e.target === helpModal && helpModal.classList.contains('visible')) closeHelpModal();
         if (e.target === settingsModal && settingsModal.classList.contains('visible')) closeSettingsModal();
     });
@@ -1019,6 +1113,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') {
             if (helpModal.style.display !== 'none' && helpModal.classList.contains('visible')) closeHelpModal();
             if (settingsModal.style.display !== 'none' && settingsModal.classList.contains('visible')) closeSettingsModal();
+            
+            const summaryModal = document.getElementById('summaryModal');
+            if (summaryModal.style.display !== 'none' && summaryModal.classList.contains('visible')) {
+                summaryModal.classList.remove('visible');
+                setTimeout(() => summaryModal.style.display = 'none', 300);
+            }
+
             if (languageOptions && languageOptions.classList.contains('show')) languageOptions.classList.remove('show');
             document.querySelectorAll('.translate-dropdown-options.show').forEach(dropdown => dropdown.classList.remove('show'));
         }
