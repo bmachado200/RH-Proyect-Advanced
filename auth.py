@@ -12,7 +12,7 @@ def init_auth(app):
     if not app:
         raise ValueError("Flask app cannot be None")
     
-    oauth.init_app(app)  # Initialize OAuth with Flask app first
+    oauth.init_app(app) 
     
     auth0 = oauth.register(
         'auth0',

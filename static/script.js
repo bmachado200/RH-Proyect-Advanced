@@ -1,4 +1,11 @@
-// Language configuration
+/*
+================================================================================
+ SECCIÓN 1: CONFIGURACIÓN GLOBAL Y TRADUCCIONES
+================================================================================
+Define textos en múltiples idiomas para la internacionalización (i18n), 
+preguntas sugeridas y variables globales para el estado de la aplicación, como 
+el idioma actual.
+*/
 const translations = {
     english: {
         title: "💬 HR Assistant",
@@ -17,13 +24,27 @@ const translations = {
         typing: "Generating response...",
         clear: "Clear Conversation",
         helpTitle: "About HR Assistant",
-        helpText: "This AI assistant specializes in HR policies and procedures at HISENSE ELECTRÓNICA MÉXICO. It can provide information from the Collective Work Agreement and Internal Work Regulations.",
-        helpCapabilities: "Capabilities:",
-        helpItem1: "Answer questions about employee rights",
-        helpItem2: "Explain HR policies and procedures",
-        helpItem3: "Provide information about benefits",
-        helpItem4: "Clarify work regulations",
+        // --- INICIO: TEXTO DE AYUDA MEJORADO (INGLÉS) ---
+        helpIntro: "This AI assistant is designed to provide quick and accurate information about HR policies and procedures at HISENSE ELECTRÓNICA MÉXICO. It can answer your questions based on documents like the Collective Work Agreement and Internal Work Regulations.",
+        helpHowItWorksTitle: "How It Works:",
+        helpHowItWorks1: "Ask any question related to company HR policies or internal regulations.",
+        helpHowItWorks2: "The assistant processes your query and provides a response based on the relevant internal documents.",
+        helpHowItWorks3: "When information is extracted directly from a document, you will see a clickable citation (e.g., [1], [Source]) next to the text.",
+        helpCitationsTitle: "Understanding Citations:",
+        helpCitations1: "Clicking a citation will open a new window showing the original document with the exact cited text highlighted.",
+        helpCitations2: "This allows you to verify the information and see its context directly in the source document.",
+        helpFeaturesTitle: "Additional Features:",
+        helpFeatures1: "Voice Input (🎙️): Use the microphone button to ask questions by voice.",
+        helpFeatures2: "Translation (🌐): Translate bot messages into other supported languages.",
+        helpFeatures3: "Summarize (📄): Get a concise summary of long bot messages.",
+        helpFeatures4: "Copy (📋): Easily copy any message to your clipboard.",
+        helpFeatures5: "Edit (✏️): Correct or modify your last question and resend it.",
+        helpSettingsTitle: "Settings (⚙️):",
+        helpSettings1: "API Key: Enter your OpenAI API Key to enable the assistant. This key is stored securely in your browser session.",
+        helpSettings2: "Theme: Switch between Light and Dark modes.",
+        helpSettings3: "Language: Change the application interface language.",
         helpLanguage: "The assistant supports English, Spanish, Simplified Chinese, and Traditional Chinese.",
+        // --- FIN: TEXTO DE AYUDA MEJORADO (INGLÉS) ---
         suggestedTitle: "Try asking:",
         helpButtonText: "Help",
         settingsButtonText: "Settings",
@@ -40,7 +61,12 @@ const translations = {
         clearKey: "Clear Key",
         translateToLabel: "Translate to:",
         translationToggleTitle: "Translate message",
-        summaryModalTitle: "Summary of Message" // <-- AÑADIDO
+        summaryModalTitle: "Summary of Message",
+        copied: "Copied!",
+        copy: "Copy",
+        edit: "Edit",
+        saveAndSubmit: "Save & Submit",
+        cancel: "Cancel"
     },
     spanish: {
         title: "💬 Asistente de RH",
@@ -59,13 +85,27 @@ const translations = {
         typing: "Generando respuesta...",
         clear: "Limpiar Conversación",
         helpTitle: "Acerca del Asistente de RH",
-        helpText: "Este asistente de IA está especializado en políticas y procedimientos de RH en HISENSE ELECTRÓNICA MÉXICO. Puede proporcionar información del Contrato Colectivo de Trabajo y el Reglamento Interno de Trabajo.",
-        helpCapabilities: "Capacidades:",
-        helpItem1: "Responder preguntas sobre derechos laborales",
-        helpItem2: "Explicar políticas y procedimientos de RH",
-        helpItem3: "Proveer información sobre beneficios",
-        helpItem4: "Aclarar regulaciones laborales",
+        // --- INICIO: TEXTO DE AYUDA MEJORADO (ESPAÑOL) ---
+        helpIntro: "Este asistente de IA está diseñado para proporcionarte información rápida y precisa sobre las políticas y procedimientos de RH en HISENSE ELECTRÓNICA MÉXICO. Puede responder a tus preguntas basándose en documentos como el Contrato Colectivo de Trabajo y el Reglamento Interno de Trabajo.",
+        helpHowItWorksTitle: "¿Cómo Funciona?",
+        helpHowItWorks1: "Haz cualquier pregunta relacionada con las políticas de RH de la empresa o el reglamento interno.",
+        helpHowItWorks2: "El asistente procesa tu consulta y te proporciona una respuesta basada en los documentos internos relevantes.",
+        helpHowItWorks3: "Cuando la información se extrae directamente de un documento, verás una cita clickeable (ej. [1], [Fuente]) junto al texto.",
+        helpCitationsTitle: "Entendiendo las Citas:",
+        helpCitations1: "Al hacer clic en una cita, se abrirá una nueva ventana mostrando el documento original con el texto exacto citado resaltado.",
+        helpCitations2: "Esto te permite verificar la información y ver su contexto directamente en el documento fuente.",
+        helpFeaturesTitle: "Funcionalidades Adicionales:",
+        helpFeatures1: "Entrada de Voz (🎙️): Usa el botón del micrófono para hacer preguntas por voz.",
+        helpFeatures2: "Traducir (🌐): Traduce los mensajes del bot a otros idiomas soportados.",
+        helpFeatures3: "Resumir (📄): Obtén un resumen conciso de mensajes largos del bot.",
+        helpFeatures4: "Copiar (📋): Copia fácilmente cualquier mensaje al portapapeles.",
+        helpFeatures5: "Editar (✏️): Corrige o modifica tu última pregunta y envíala de nuevo.",
+        helpSettingsTitle: "Configuración (⚙️):",
+        helpSettings1: "Clave API: Ingresa tu clave API de OpenAI para habilitar el asistente. Esta clave se guarda de forma segura en tu sesión del navegador.",
+        helpSettings2: "Tema: Cambia entre el modo Claro y Oscuro.",
+        helpSettings3: "Idioma: Cambia el idioma de la interfaz de la aplicación.",
         helpLanguage: "El asistente soporta inglés, español, chino simplificado y chino tradicional.",
+        // --- FIN: TEXTO DE AYUDA MEJORADO (ESPAÑOL) ---
         suggestedTitle: "Prueba preguntando:",
         helpButtonText: "Ayuda",
         settingsButtonText: "Configuración",
@@ -82,7 +122,12 @@ const translations = {
         clearKey: "Borrar Clave",
         translateToLabel: "Traducir a:",
         translationToggleTitle: "Traducir mensaje",
-        summaryModalTitle: "Resumen del Mensaje" // <-- AÑADIDO
+        summaryModalTitle: "Resumen del Mensaje",
+        copied: "¡Copiado!",
+        copy: "Copiar",
+        edit: "Editar",
+        saveAndSubmit: "Guardar y Enviar",
+        cancel: "Cancelar"
     },
     chinese_simplified: {
         title: "💬 人力资源助理",
@@ -101,8 +146,8 @@ const translations = {
         typing: "正在生成回复... (简体)",
         clear: "清除对话 (简体)",
         helpTitle: "关于人力资源助理 (简体)",
-        helpText: "此AI助理专注于海信电子墨西哥公司的人力资源政策和程序。它可以提供来自集体工作协议和内部工作条例的信息。(简体)",
-        helpCapabilities: "功能: (简体)",
+        helpText: "此AI助理专注于海信电子墨西哥公司的人力资源政策和程序。它可以提供来自集体工作协议和内部工作条例的信息。(简体)", // Actualizar con detalle
+        helpCapabilities: "功能: (简体)", // Actualizar con detalle
         helpItem1: "回答有关员工权利的问题 (简体)",
         helpItem2: "解释人力资源政策和程序 (简体)",
         helpItem3: "提供有关福利的信息 (简体)",
@@ -124,7 +169,12 @@ const translations = {
         clearKey: "清除密钥 (简体)",
         translateToLabel: "翻译成: (简体)",
         translationToggleTitle: "翻译消息 (简体)",
-        summaryModalTitle: "消息摘要 (简体)" // <-- AÑADIDO
+        summaryModalTitle: "消息摘要 (简体)",
+        copied: "已复制!",
+        copy: "复制",
+        edit: "编辑",
+        saveAndSubmit: "保存并提交",
+        cancel: "取消"
     },
     chinese_traditional: {
         title: "💬 人力資源助理",
@@ -143,8 +193,8 @@ const translations = {
         typing: "正在產生回覆... (繁體)",
         clear: "清除對話 (繁體)",
         helpTitle: "關於人力資源助理 (繁體)",
-        helpText: "此AI助理專注於海信電子墨西哥公司的人力資源政策和程序。它可以提供來自集體工作協議和內部工作條例的資訊。(繁體)",
-        helpCapabilities: "功能: (繁體)",
+        helpText: "此AI助理專注於海信電子墨西哥公司的人力資源政策和程序。它可以提供來自集體工作協議和內部工作條例的資訊。(繁體)", // Actualizar con detalle
+        helpCapabilities: "功能: (繁體)", // Actualizar con detalle
         helpItem1: "回答有關員工權利的問題 (繁體)",
         helpItem2: "解釋人力資源政策和程序 (繁體)",
         helpItem3: "提供有關福利的資訊 (繁體)",
@@ -166,7 +216,12 @@ const translations = {
         clearKey: "清除金鑰 (繁體)",
         translateToLabel: "翻譯成: (繁體)",
         translationToggleTitle: "翻譯訊息 (繁體)",
-        summaryModalTitle: "訊息摘要 (繁體)" // <-- AÑADIDO
+        summaryModalTitle: "訊息摘要 (繁體)",
+        copied: "已複製!",
+        copy: "複製",
+        edit: "編輯",
+        saveAndSubmit: "儲存並提交",
+        cancel: "取消"
     }
 };
 
@@ -204,7 +259,12 @@ const availableLanguages = {
     chinese_simplified: "简体中文",
     chinese_traditional: "繁體中文"
 };
-// DOM Elements
+
+/*
+================================================================================
+ SECCIÓN 2: SELECCIÓN DE ELEMENTOS DEL DOM
+================================================================================
+*/
 const chatTitle = document.getElementById('chatTitle');
 const userInput = document.getElementById('userInput');
 const sendButton = document.getElementById('sendButton');
@@ -231,19 +291,20 @@ const sidebarElement = document.querySelector('.sidebar');
 const themeToggleButton = document.getElementById('themeToggleButton');
 const themeIcon = document.getElementById('themeIcon');
 const themeButtonText = document.getElementById('themeButtonText');
-
-const languageButtonContainer = document.getElementById('languageButtonContainer'); // The div container
-const currentLanguageDisplay = document.getElementById('currentLanguageDisplay'); // The button part of the dropdown
-const languageButtonText = document.getElementById('languageButtonText'); // The span inside currentLanguageDisplay
-const languageOptions = document.getElementById('languageOptions'); // The div holding the language choices
-
-// Global variable to hold the AbortController
+const languageButtonContainer = document.getElementById('languageButtonContainer');
+const currentLanguageDisplay = document.getElementById('currentLanguageDisplay');
+const languageButtonText = document.getElementById('languageButtonText');
+const languageOptions = document.getElementById('languageOptions');
 let abortController = null;
 
-// --- SPEECH RECOGNITION SETUP ---
+/*
+================================================================================
+ SECCIÓN 3: CONFIGURACIÓN DEL RECONOCIMIENTO DE VOZ (Web Speech API)
+================================================================================
+*/
 let isRecording = false;
 let recognition;
-let finalTranscript = ''; // Variable to store the accumulated final transcript
+let finalTranscript = '';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (SpeechRecognition) {
@@ -282,7 +343,11 @@ if (SpeechRecognition) {
     console.warn("Speech Recognition not supported in this browser.");
     if(micButton) micButton.style.display = 'none';
 }
-// --- END OF SPEECH RECOGNITION SETUP ---
+/*
+================================================================================
+ SECCIÓN 4: GESTIÓN DEL TEMA (MODO CLARO/OSCURO)
+================================================================================
+*/
 
 function setInitialTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -311,6 +376,12 @@ function toggleTheme() {
     }
     localStorage.setItem('theme', currentTheme);
 }
+
+/*
+================================================================================
+ SECCIÓN 5: INICIALIZACIÓN Y ACTUALIZACIÓN DE LA INTERFAZ DE USUARIO (UI)
+================================================================================
+*/
 
 function initUI() {
     setInitialTheme();
@@ -375,14 +446,33 @@ function updateUIText() {
     if (languageButtonText) languageButtonText.textContent = lang.currentLanguageText;
     if (currentLanguageDisplay) currentLanguageDisplay.title = lang.languageButton;
 
+    // --- INICIO: ACTUALIZACIÓN DE TEXTOS EN EL MODAL DE AYUDA ---
     document.getElementById('helpModalTitle').textContent = lang.helpTitle;
-    document.getElementById('helpModalText').textContent = lang.helpText;
-    document.getElementById('helpModalCapabilities').textContent = lang.helpCapabilities;
-    document.getElementById('helpModalItem1').textContent = lang.helpItem1;
-    document.getElementById('helpModalItem2').textContent = lang.helpItem2;
-    document.getElementById('helpModalItem3').textContent = lang.helpItem3;
-    document.getElementById('helpModalItem4').textContent = lang.helpItem4;
+    document.getElementById('helpIntro').textContent = lang.helpIntro;
+    
+    document.getElementById('helpHowItWorksTitle').textContent = lang.helpHowItWorksTitle;
+    document.getElementById('helpHowItWorks1').textContent = lang.helpHowItWorks1;
+    document.getElementById('helpHowItWorks2').textContent = lang.helpHowItWorks2;
+    document.getElementById('helpHowItWorks3').textContent = lang.helpHowItWorks3;
+
+    document.getElementById('helpCitationsTitle').textContent = lang.helpCitationsTitle;
+    document.getElementById('helpCitations1').textContent = lang.helpCitations1;
+    document.getElementById('helpCitations2').textContent = lang.helpCitations2;
+
+    document.getElementById('helpFeaturesTitle').textContent = lang.helpFeaturesTitle;
+    document.getElementById('helpFeatures1').textContent = lang.helpFeatures1;
+    document.getElementById('helpFeatures2').textContent = lang.helpFeatures2;
+    document.getElementById('helpFeatures3').textContent = lang.helpFeatures3;
+    document.getElementById('helpFeatures4').textContent = lang.helpFeatures4;
+    document.getElementById('helpFeatures5').textContent = lang.helpFeatures5;
+
+    document.getElementById('helpSettingsTitle').textContent = lang.helpSettingsTitle;
+    document.getElementById('helpSettings1').textContent = lang.helpSettings1;
+    document.getElementById('helpSettings2').textContent = lang.helpSettings2;
+    document.getElementById('helpSettings3').textContent = lang.helpSettings3;
+
     document.getElementById('helpModalLanguage').textContent = lang.helpLanguage;
+    // --- FIN: ACTUALIZACIÓN DE TEXTOS EN EL MODAL DE AYUDA ---
 
     document.getElementById('settingsModalTitle').textContent = lang.settingsTitle;
     document.getElementById('settingsModalText').textContent = lang.settingsText;
@@ -390,8 +480,6 @@ function updateUIText() {
     apiKeyInput.placeholder = lang.apiKeyPlaceholder;
     saveSettingsButton.textContent = lang.saveSettings;
     clearKeyButton.textContent = lang.clearKey;
-
-    // --- AÑADIDO: Actualiza el título del modal de resumen ---
     document.getElementById('summaryModalTitle').textContent = lang.summaryModalTitle;
 
     const langOptionsLinks = languageOptions.querySelectorAll('a[data-lang]');
@@ -401,6 +489,11 @@ function updateUIText() {
     });
 }
 
+/*
+================================================================================
+ SECCIÓN 6: COMPONENTES Y FUNCIONALIDADES DE LA UI
+================================================================================
+*/
 function showSuggestedQuestions() {
     const questionsContainer = document.createElement('div');
     questionsContainer.className = 'suggested-questions';
@@ -514,6 +607,11 @@ function closeSettingsModal() {
     }, 300);
 }
 
+/*
+================================================================================
+ SECCIÓN 7: GESTIÓN DE API KEY
+================================================================================
+*/
 function saveApiKey() {
     const apiKey = apiKeyInput.value.trim();
     if (!apiKey) {
@@ -569,24 +667,224 @@ function clearApiKey() {
     });
 }
 
-function createMessageActionButtons(messageElement) {
-    const existingContainer = messageElement.querySelector('.action-buttons-container');
-    if (existingContainer) existingContainer.remove();
+/*
+================================================================================
+ SECCIÓN 8: ACCIONES DE MENSAJE (TRADUCIR, RESUMIR, COPIAR, EDITAR)
+================================================================================
+*/
 
-    const actionButtonsContainer = document.createElement('div');
-    actionButtonsContainer.className = 'action-buttons-container persistent';
+/**
+ * Agrega botones de acción (Copiar, Editar) a un elemento de mensaje.
+ * @param {HTMLElement} messageElement - El elemento div del mensaje completo.
+ * @param {boolean} isUserMessage - True si el mensaje es del usuario.
+ */
+function addMessageActions(messageElement, isUserMessage) {
+    const lang = translations[appLanguage];
+    let footer = messageElement.querySelector('.message-footer');
+
+    // Si no existe un pie de página, créalo.
+    if (!footer) {
+        footer = document.createElement('div');
+        footer.className = 'message-footer';
+        messageElement.appendChild(footer);
+    } else {
+        // Limpiar botones existentes para evitar duplicados si se llama varias veces
+        footer.innerHTML = '';
+    }
+
+    // --- Botón de Copiar ---
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'message-action-btn';
+    copyBtn.title = lang.copy;
+    copyBtn.innerHTML = '📋'; // Icono de portapapeles
+    copyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const messageBody = messageElement.querySelector('.message-body');
+        // Usar .innerText para obtener el texto visible sin HTML
+        const textToCopy = messageBody ? messageBody.innerText : '';
+        // Utilizar document.execCommand para compatibilidad con iframes
+        const textArea = document.createElement('textarea');
+        textArea.value = textToCopy;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            // Feedback visual
+            copyBtn.innerHTML = '✅';
+            copyBtn.title = lang.copied;
+            setTimeout(() => {
+                copyBtn.innerHTML = '📋';
+                copyBtn.title = lang.copy;
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            alert('Failed to copy text.');
+        } finally {
+            document.body.removeChild(textArea);
+        }
+    });
+    footer.appendChild(copyBtn);
+
+    // --- Botón de Editar (solo para mensajes de usuario) ---
+    if (isUserMessage) {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'message-action-btn';
+        editBtn.title = lang.edit;
+        editBtn.innerHTML = '✏️'; // Icono de lápiz
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            enterEditMode(messageElement);
+        });
+        footer.appendChild(editBtn);
+    }
+}
+
+
+/**
+ * Pone un mensaje de usuario en modo de edición.
+ * @param {HTMLElement} messageElement - El elemento div del mensaje del usuario.
+ */
+function enterEditMode(messageElement) {
+    const bubble = messageElement.querySelector('.message-bubble');
+    const messageBody = messageElement.querySelector('.message-body');
+    if (!bubble || !messageBody) return;
+
+    // Ocultar botones de acción existentes
+    const footer = messageElement.querySelector('.message-footer');
+    if(footer) footer.style.display = 'none';
+
+    // Guardar el contenido original para restaurar si se cancela
+    const originalHTML = messageBody.innerHTML;
+    const originalText = messageBody.innerText; // Usar innerText para obtener el texto puro
+    bubble.dataset.originalHtml = originalHTML; // Guardar HTML original
+    
+    // Limpiar contenido y crear el editor
+    messageBody.innerHTML = ''; 
+
+    const editContainer = document.createElement('div');
+    editContainer.className = 'edit-controls';
+
+    const textArea = document.createElement('textarea');
+    textArea.value = originalText; // Cargar el texto puro
+    
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.className = 'buttons-container';
+
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = translations[appLanguage].saveAndSubmit;
+    saveBtn.className = 'save-edit-btn';
+    saveBtn.onclick = (e) => {
+        e.stopPropagation();
+        saveEdit(messageElement);
+    };
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = translations[appLanguage].cancel;
+    cancelBtn.className = 'cancel-edit-btn';
+    cancelBtn.onclick = (e) => {
+        e.stopPropagation();
+        cancelEdit(messageElement);
+    };
+
+    buttonsContainer.appendChild(saveBtn);
+    buttonsContainer.appendChild(cancelBtn);
+
+    editContainer.appendChild(textArea);
+    editContainer.appendChild(buttonsContainer);
+    messageBody.appendChild(editContainer);
+    
+    textArea.focus();
+    // Ajustar altura del textarea para que quepa el contenido
+    textArea.style.height = 'auto';
+    textArea.style.height = (textArea.scrollHeight) + 'px';
+}
+
+/**
+ * Cancela el modo de edición y restaura el mensaje original.
+ * @param {HTMLElement} messageElement 
+ */
+function cancelEdit(messageElement) {
+    const bubble = messageElement.querySelector('.message-bubble');
+    const messageBody = messageElement.querySelector('.message-body');
+    if (bubble && messageBody && bubble.dataset.originalHtml) {
+        messageBody.innerHTML = bubble.dataset.originalHtml;
+        delete bubble.dataset.originalHtml;
+    }
+    const footer = messageElement.querySelector('.message-footer');
+    if(footer) footer.style.display = 'flex'; // Mostrar de nuevo los botones de acción
+}
+
+/**
+ * Guarda el texto editado, actualiza el mensaje y vuelve a enviar la pregunta.
+ * @param {HTMLElement} messageElement 
+ */
+function saveEdit(messageElement) {
+    const bubble = messageElement.querySelector('.message-bubble');
+    const newText = messageElement.querySelector('textarea').value.trim();
+
+    if (!newText) {
+        cancelEdit(messageElement); // Si el texto está vacío, cancela la edición
+        return;
+    }
+
+    // Eliminar todos los mensajes que vinieron después del que se está editando
+    let nextElement = messageElement.nextElementSibling;
+    while (nextElement) {
+        let toRemove = nextElement;
+        nextElement = nextElement.nextElementSibling;
+        toRemove.remove();
+    }
+    
+    // Restaurar el contenido del mensaje del usuario con el nuevo texto
+    const messageBody = messageElement.querySelector('.message-body');
+    messageBody.innerHTML = newText.replace(/\n/g, '<br>'); // Reemplazar saltos de línea por <br>
+    delete bubble.dataset.originalHtml; // Limpiar el HTML original guardado
+
+    const footer = messageElement.querySelector('.message-footer');
+    if(footer) footer.style.display = 'flex'; // Mostrar de nuevo los botones de acción
+
+    // Llamar a sendMessage para obtener una nueva respuesta del bot
+    // Pasar el nuevo texto como questionOverride
+    sendMessage(newText);
+}
+
+/**
+ * Crea los botones de Traducir y Resumir para los mensajes del bot.
+ * @param {HTMLElement} messageElement 
+ */
+function createMessageActionButtons(messageElement) {
+    let footer = messageElement.querySelector('.message-footer');
+    if (!footer) {
+        footer = document.createElement('div');
+        footer.className = 'message-footer';
+        messageElement.appendChild(footer);
+    }
+
+    // Contenedor específico para los botones avanzados (traducir, resumir)
+    // Esto asegura que no se dupliquen y se manejen aparte de copiar/editar
+    let advancedActionsContainer = footer.querySelector('.advanced-actions');
+    if (!advancedActionsContainer) {
+        advancedActionsContainer = document.createElement('div');
+        advancedActionsContainer.className = 'advanced-actions';
+        advancedActionsContainer.style.display = 'flex';
+        advancedActionsContainer.style.gap = '8px';
+        footer.appendChild(advancedActionsContainer);
+    } else {
+        advancedActionsContainer.innerHTML = ''; // Limpiar para evitar duplicados
+    }
 
     const dropdownContainer = document.createElement('div');
     dropdownContainer.className = 'message-translation-dropdown';
 
     const toggleButton = document.createElement('button');
-    toggleButton.className = 'translate-dropdown-toggle message-action-button';
+    toggleButton.className = 'translate-dropdown-toggle message-action-btn'; // Usar la clase de botón general
     toggleButton.innerHTML = '🌐';
     toggleButton.title = translations[appLanguage].translationToggleTitle;
 
     const optionsDiv = document.createElement('div');
     optionsDiv.className = 'translate-dropdown-options';
 
+    const messageBody = messageElement.querySelector('.message-body');
     const currentMsgLang = messageElement.dataset.currentLanguage || messageElement.dataset.originalLanguage || appLanguage;
 
     let optionsCount = 0;
@@ -600,7 +898,7 @@ function createMessageActionButtons(messageElement) {
             optionLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (messageElement.querySelector('.message-text').dataset.translationInProgress === "true") return;
+                if (messageBody.dataset.translationInProgress === "true") return;
                 translateMessage(messageElement, langKey);
                 optionsDiv.classList.remove('show');
             });
@@ -611,7 +909,7 @@ function createMessageActionButtons(messageElement) {
     if (optionsCount > 0) {
         dropdownContainer.appendChild(toggleButton);
         dropdownContainer.appendChild(optionsDiv);
-        actionButtonsContainer.appendChild(dropdownContainer);
+        advancedActionsContainer.appendChild(dropdownContainer);
         
         toggleButton.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -625,7 +923,7 @@ function createMessageActionButtons(messageElement) {
     }
 
     const summarizeButton = document.createElement('button');
-    summarizeButton.className = 'summarize-button message-action-button';
+    summarizeButton.className = 'translate-dropdown-toggle message-action-btn'; // Usar la clase de botón general
     summarizeButton.innerHTML = '📄';
     summarizeButton.title = 'Resumir este mensaje';
     summarizeButton.addEventListener('click', (e) => {
@@ -633,28 +931,33 @@ function createMessageActionButtons(messageElement) {
         summarizeMessage(messageElement);
     });
 
-    actionButtonsContainer.appendChild(summarizeButton);
-    messageElement.appendChild(actionButtonsContainer);
+    advancedActionsContainer.appendChild(summarizeButton);
 }
 
 
 function translateMessage(messageElement, targetLanguage) {
-    const messageTextElement = messageElement.querySelector('.message-text');
-    if (!messageTextElement || messageTextElement.dataset.translationInProgress === "true") return;
+    const messageBody = messageElement.querySelector('.message-body');
+    if (!messageBody || messageBody.dataset.translationInProgress === "true") return;
 
-    if (!messageTextElement.dataset.originalText) {
-        messageTextElement.dataset.originalText = messageTextElement.innerHTML;
-        messageTextElement.dataset.originalLanguage = messageElement.dataset.currentLanguage || appLanguage;
+    if (!messageBody.dataset.originalText) {
+        messageBody.dataset.originalText = messageBody.innerHTML;
+        messageBody.dataset.originalLanguage = messageElement.dataset.currentLanguage || appLanguage;
     }
     
-    const textToTranslate = messageTextElement.dataset.originalText;
-    const sourceLanguageForPrompt = messageTextElement.dataset.originalLanguage;
+    const textToTranslate = messageBody.dataset.originalText;
+    const sourceLanguageForPrompt = messageBody.dataset.originalLanguage;
 
-    messageTextElement.dataset.translationInProgress = "true";
-    messageTextElement.innerHTML = `<div class="loading-translation">${translations[appLanguage].translating}</div>`;
+    messageBody.dataset.translationInProgress = "true";
+    messageBody.innerHTML = `<div class="loading-translation">${translations[appLanguage].translating}</div>`;
     
-    const toggleButton = messageElement.querySelector('.translate-dropdown-toggle');
-    if (toggleButton) toggleButton.disabled = true;
+    // Deshabilitar botones mientras se traduce
+    const actionBtns = messageElement.querySelectorAll('.message-action-btn');
+    actionBtns.forEach(btn => btn.disabled = true);
+    
+    // Ocultar botones avanzados durante la traducción
+    const advancedActions = messageElement.querySelector('.advanced-actions');
+    if(advancedActions) advancedActions.style.display = 'none';
+
 
     fetch('/translate', {
         method: 'POST',
@@ -675,7 +978,7 @@ function translateMessage(messageElement, targetLanguage) {
             });
         }
 
-        messageTextElement.innerHTML = '';
+        messageBody.innerHTML = '';
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let partialData = '';
@@ -684,11 +987,14 @@ function translateMessage(messageElement, targetLanguage) {
         function readStream() {
             reader.read().then(({ done, value }) => {
                 if (done) {
-                    delete messageTextElement.dataset.translationInProgress;
-                    if (toggleButton) toggleButton.disabled = false;
-                    messageTextElement.dataset.originalText = fullTranslatedResponse;
+                    delete messageBody.dataset.translationInProgress;
+                    actionBtns.forEach(btn => btn.disabled = false); // Re-habilitar botones
+                    messageBody.dataset.originalText = fullTranslatedResponse;
                     messageElement.dataset.currentLanguage = targetLanguage;
-                    createMessageActionButtons(messageElement);
+                    createMessageActionButtons(messageElement); // Volver a crear los botones para el nuevo idioma
+                    
+                    // Asegurar que los botones avanzados se muestran al finalizar
+                    if(advancedActions) advancedActions.style.display = 'flex';
                     return;
                 }
 
@@ -704,12 +1010,12 @@ function translateMessage(messageElement, targetLanguage) {
                             
                             const data = JSON.parse(jsonData);
                             if (data.token) {
-                                messageTextElement.innerHTML += data.token;
+                                messageBody.innerHTML += data.token;
                                 fullTranslatedResponse += data.token;
                             }
                             if (data.error) {
                                 console.error("Server error during translation stream:", data.error);
-                                messageTextElement.innerHTML += `<br><span class="stream-error">Error: ${data.error}</span>`;
+                                messageBody.innerHTML += `<br><span class="stream-error">Error: ${data.error}</span>`;
                             }
                         } catch (e) {
                             console.error("Error parsing translation stream data:", e, "Line:", line);
@@ -720,25 +1026,28 @@ function translateMessage(messageElement, targetLanguage) {
                 return readStream();
             }).catch(streamError => {
                 console.error('Translation stream reading error:', streamError);
-                messageTextElement.innerHTML = messageTextElement.dataset.originalText;
-                delete messageTextElement.dataset.translationInProgress;
-                if (toggleButton) toggleButton.disabled = false;
+                messageBody.innerHTML = messageBody.dataset.originalText;
+                delete messageBody.dataset.translationInProgress;
+                actionBtns.forEach(btn => btn.disabled = false); // Re-habilitar botones
+                if(advancedActions) advancedActions.style.display = 'flex'; // Restaurar si falla
             });
         }
         return readStream();
     })
     .catch(error => {
         console.error('Translation fetch failed:', error);
-        messageTextElement.innerHTML = messageTextElement.dataset.originalText || "Error during translation.";
-        delete messageTextElement.dataset.translationInProgress;
-        if (toggleButton) toggleButton.disabled = false;
+        messageBody.innerHTML = messageBody.dataset.originalText || "Error during translation.";
+        delete messageBody.dataset.translationInProgress;
+        const actionBtns = messageElement.querySelectorAll('.message-action-btn');
+        actionBtns.forEach(btn => btn.disabled = false); // Re-habilitar botones
+        const advancedActions = messageElement.querySelector('.advanced-actions');
+        if(advancedActions) advancedActions.style.display = 'flex'; // Restaurar si falla
     });
 }
 
 function summarizeMessage(messageElement) {
-    const messageTextElement = messageElement.querySelector('.message-text');
-    const originalText = messageTextElement.dataset.originalText || messageTextElement.innerHTML;
-    // --- AÑADIDO: Obtiene el idioma del mensaje para enviarlo al backend ---
+    const messageBody = messageElement.querySelector('.message-body');
+    const originalText = messageBody.dataset.originalText || messageBody.innerHTML;
     const textLanguage = messageElement.dataset.currentLanguage || appLanguage;
 
     const summaryModal = document.getElementById('summaryModal');
@@ -771,7 +1080,6 @@ function summarizeMessage(messageElement) {
             'Content-Type': 'application/json',
             'Accept': 'text/event-stream'
         },
-        // --- MODIFICADO: Envía el idioma del texto al backend ---
         body: JSON.stringify({ 
             text: originalText,
             language: textLanguage 
@@ -836,24 +1144,44 @@ function summarizeMessage(messageElement) {
 }
 
 
+/*
+================================================================================
+ SECCIÓN 9: LÓGICA PRINCIPAL DEL CHAT
+================================================================================
+*/
+
+/**
+ * Agrega un mensaje del bot al chat.
+ * @param {string} message - El contenido del mensaje.
+ * @param {boolean} specialEffect - Si se aplica el efecto de tipeo.
+ * @returns {HTMLElement} El elemento del mensaje del bot.
+ */
 function addBotMessage(message, specialEffect = true) {
     const messageElement = document.createElement('div');
     messageElement.className = 'message bot-message';
-    messageElement.dataset.originalLanguage = appLanguage; 
+    messageElement.dataset.originalLanguage = appLanguage;
     messageElement.dataset.currentLanguage = appLanguage;
 
-    const messageContent = document.createElement('div');
-    messageContent.className = 'message-text';
-    messageElement.appendChild(messageContent);
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+
+    const messageBody = document.createElement('div');
+    messageBody.className = 'message-body';
+
+    bubble.appendChild(messageBody);
+    messageElement.appendChild(bubble);
     chatBox.appendChild(messageElement);
+
+    // Añadir botones de copiar inmediatamente (y otros si los hubiera para bots)
+    addMessageActions(messageElement, false);
 
     setTimeout(() => {
         if (specialEffect === false) {
-            messageContent.innerHTML = message;
+            messageBody.innerHTML = message;
             chatBox.scrollTop = chatBox.scrollHeight;
             if (message !== translations[appLanguage].greeting && !message.toLowerCase().includes("error")) {
-                messageContent.dataset.originalText = messageContent.innerHTML;
-                createMessageActionButtons(messageElement);
+                messageBody.dataset.originalText = messageBody.innerHTML;
+                createMessageActionButtons(messageElement); // Traducir/Resumir para bots
             }
         } else {
             let i = 0;
@@ -863,14 +1191,14 @@ function addBotMessage(message, specialEffect = true) {
 
             function typingEffect() {
                 if (i < message.length) {
-                    messageContent.innerHTML += message.charAt(i++);
+                    messageBody.innerHTML += message.charAt(i++);
                     chatBox.scrollTop = chatBox.scrollHeight;
                     setTimeout(typingEffect, typingSpeed);
                 } else {
                     chatBox.scrollTop = chatBox.scrollHeight;
                     if (message !== translations[appLanguage].greeting) {
-                        messageContent.dataset.originalText = messageContent.innerHTML;
-                        createMessageActionButtons(messageElement);
+                        messageBody.dataset.originalText = messageBody.innerHTML;
+                        createMessageActionButtons(messageElement); // Traducir/Resumir para bots
                     }
                 }
             }
@@ -880,13 +1208,31 @@ function addBotMessage(message, specialEffect = true) {
     return messageElement;
 }
 
+/**
+ * Agrega un mensaje del usuario al chat.
+ * @param {string} message - El contenido del mensaje.
+ */
 function addUserMessage(message) {
     const messageElement = document.createElement('div');
     messageElement.className = 'message user-message';
-    messageElement.innerHTML = message.replace(/\n/g, '<br>');
+
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+
+    const messageBody = document.createElement('div');
+    messageBody.className = 'message-body';
+    messageBody.innerHTML = message.replace(/\n/g, '<br>');
+
+    bubble.appendChild(messageBody);
+    messageElement.appendChild(bubble);
     chatBox.appendChild(messageElement);
+
+    // Añadir botones de copiar y editar para mensajes de usuario
+    addMessageActions(messageElement, true); 
+
     chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
 }
+
 
 function toggleChatButtons(isGenerating) {
     if (isGenerating) {
@@ -901,34 +1247,57 @@ function toggleChatButtons(isGenerating) {
     }
 }
 
-function sendMessage() {
-    const question = userInput.value.trim();
+/**
+ * Envía un mensaje al asistente y maneja la respuesta en streaming.
+ * Permite reenviar una pregunta (por ejemplo, después de editarla).
+ * @param {string} [questionOverride=null] - Texto de la pregunta a enviar, si es diferente del input del usuario.
+ */
+function sendMessage(questionOverride = null) {
+    const question = questionOverride ?? userInput.value.trim();
     if (!question) {
-        alert(translations[appLanguage].noQuestion);
+        if (!questionOverride) alert(translations[appLanguage].noQuestion);
         return;
     }
-    addUserMessage(question);
-    userInput.value = '';
+
+    // Solo agregar un nuevo mensaje de usuario si no es una edición
+    if (!questionOverride) {
+        addUserMessage(question);
+        userInput.value = '';
+    }
 
     toggleChatButtons(true);
     abortController = new AbortController();
+    
+    // --- Creación de la respuesta del bot con la nueva estructura ---
+    const botMessageElement = document.createElement('div');
+    botMessageElement.className = 'message bot-message';
+    botMessageElement.dataset.originalLanguage = appLanguage;
+    botMessageElement.dataset.currentLanguage = appLanguage;
 
-    const botResponseContainer = document.createElement('div');
-    botResponseContainer.className = 'message bot-message';
-    botResponseContainer.dataset.originalLanguage = appLanguage;
-    botResponseContainer.dataset.currentLanguage = appLanguage;
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
 
-    const messageTextElement = document.createElement('div');
-    messageTextElement.className = 'message-text';
-    messageTextElement.innerHTML = `
+    const messageBody = document.createElement('div');
+    messageBody.className = 'message-body';
+    messageBody.innerHTML = `
         <div class="generating-indicator">
             <div class="generating-loader"></div>
             <div class="generating-text">${translations[appLanguage].typing}</div>
         </div>
     `;
-    botResponseContainer.appendChild(messageTextElement);
-    chatBox.appendChild(botResponseContainer);
+    
+    bubble.appendChild(messageBody);
+    botMessageElement.appendChild(bubble);
+    // Añadir botones de acción (solo copiar al inicio, los demás al final del stream)
+    addMessageActions(botMessageElement, false); 
+
+    chatBox.appendChild(botMessageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
+
+
+    function escapeRegex(string) {
+        return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
 
     fetch('/ask', {
         method: 'POST',
@@ -938,51 +1307,77 @@ function sendMessage() {
     })
     .then(response => {
         if (!response.ok) {
-            if (botResponseContainer.parentNode === chatBox) chatBox.removeChild(botResponseContainer);
+            if (botMessageElement.parentNode === chatBox) chatBox.removeChild(botMessageElement);
             return response.json().then(errData => { throw new Error(errData.error || `HTTP error! status: ${response.status}`); })
                            .catch(() => { throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`); });
         }
-        messageTextElement.innerHTML = '';
-        botResponseContainer.classList.add('streaming');
+        
+        messageBody.innerHTML = ''; // Limpiar el indicador "Generando..."
+        messageBody.classList.add('streaming');
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let partialData = '';
         let fullStreamedResponse = "";
+        let annotationsData = []; // Para guardar la información de las citas
 
         function readStream() {
             reader.read().then(({ done, value }) => {
                 if (done) {
-                    botResponseContainer.classList.remove('streaming');
-                    messageTextElement.dataset.originalText = fullStreamedResponse;
-                    createMessageActionButtons(botResponseContainer);
+                    messageBody.classList.remove('streaming');
+                    messageBody.dataset.originalText = fullStreamedResponse;
+
+                    if (annotationsData.length > 0) {
+                        let currentHtml = messageBody.innerHTML;
+                        annotationsData.forEach(ann => {
+                            // Codificamos los parámetros para que se puedan enviar en una URL de forma segura.
+                            const encodedFilename = encodeURIComponent(ann.file_name);
+                            // Asegurarse de que `ann.quote` exista antes de codificarlo
+                            const encodedQuote = ann.quote ? encodeURIComponent(ann.quote) : '';
+
+                            // El enlace ahora apunta a nuestro nuevo visor: /view_document
+                            // Si no hay quote, el enlace aún se genera pero el visor mostrará todo el doc.
+                            const link = `<a href="/view_document?file=${encodedFilename}&quote=${encodedQuote}" target="_blank" class="citation-link" title="Ver cita en: ${ann.file_name}">${ann.text_to_replace}</a>`;
+                            
+                            const regex = new RegExp(escapeRegex(ann.text_to_replace), 'g');
+                            currentHtml = currentHtml.replace(regex, link);
+                        });
+                        messageBody.innerHTML = currentHtml;
+                    }
+
+                    // Después de que el stream termina y se procesan las citas, creamos los botones de acción avanzados.
+                    createMessageActionButtons(botMessageElement);
                     chatBox.scrollTop = chatBox.scrollHeight;
                     return;
                 }
                 partialData += decoder.decode(value, { stream: true });
                 const lines = partialData.split('\n\n');
                 partialData = lines.pop();
+
                 lines.forEach(line => {
                     if (line.startsWith('data: ')) {
                         try {
                             const jsonData = line.substring(6);
                             if (jsonData.trim() === "[DONE]") return;
+                            
                             const data = JSON.parse(jsonData);
-                            if (data.token) {
-                                messageTextElement.innerHTML += data.token;
-                                fullStreamedResponse += data.token;
+                            
+                            if (data.type === 'token') {
+                                messageBody.innerHTML += data.value;
+                                fullStreamedResponse += data.value;
                                 chatBox.scrollTop = chatBox.scrollHeight;
-                            }
-                            if (data.error) {
+                            } else if (data.type === 'annotations') {
+                                annotationsData = data.data; // Guardamos los datos de la cita
+                            } else if (data.error) {
                                 console.error("Server error during stream:", data.error);
-                                messageTextElement.innerHTML += `<br><span class="stream-error">Error: ${data.error}</span>`;
+                                messageBody.innerHTML += `<br><span class="stream-error">Error: ${data.error}</span>`;
                             }
-                        } catch (e) { console.error("Error parsing stream data:", e, "Line:", line); }
+                        } catch (e) { console.error("Error al parsear datos del stream:", e, "Línea:", line); }
                     }
                 });
                 return readStream();
             }).catch(streamError => {
                  console.error('Stream reading error:', streamError);
-                 if (botResponseContainer.parentNode === chatBox) chatBox.removeChild(botResponseContainer);
+                 if (botMessageElement.parentNode === chatBox) chatBox.removeChild(botMessageElement);
                  addBotMessage(`${translations[appLanguage].error.split("<a")[0]}: Streaming failed.`, false);
             });
         }
@@ -990,18 +1385,17 @@ function sendMessage() {
     })
     .catch(error => {
         if (error.name === 'AbortError') {
-            console.log('Fetch aborted by user.');
-            if (botResponseContainer && botResponseContainer.parentNode === chatBox) {
-                const messageText = botResponseContainer.querySelector('.message-text');
-                if (messageText) {
-                    messageText.innerHTML = 'Response generation stopped by user.';
-                    botResponseContainer.classList.remove('streaming');
+            console.log('Fetch abortado por el usuario.');
+            if (botMessageElement && botMessageElement.parentNode === chatBox) {
+                if (messageBody) {
+                    messageBody.innerHTML = 'Generación de respuesta detenida por el usuario.';
+                    messageBody.classList.remove('streaming');
                 }
             }
         } else {
-            console.error('Fetch/Ask Error:', error);
-            if (botResponseContainer && botResponseContainer.parentNode === chatBox) {
-                chatBox.removeChild(botResponseContainer);
+            console.error('Error en Fetch/Ask:', error);
+            if (botMessageElement && botMessageElement.parentNode === chatBox) {
+                chatBox.removeChild(botMessageElement);
             }
             addBotMessage(`${translations[appLanguage].error.split("<a")[0]}: ${error.message}`, false);
         }
@@ -1012,6 +1406,12 @@ function sendMessage() {
     });
 }
 
+
+/*
+================================================================================
+ SECCIÓN 10: MANEJADORES DE EVENTOS (EVENT LISTENERS)
+================================================================================
+*/
 document.addEventListener('DOMContentLoaded', () => {
     initUI();
 
@@ -1037,7 +1437,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     sendButton.disabled = true;
 
-    sendButton.addEventListener('click', sendMessage);
+    // Cambiado para llamar a sendMessage() sin argumento por defecto
+    sendButton.addEventListener('click', () => sendMessage()); 
     userInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -1099,18 +1500,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 languageOptions.classList.remove('show');
             }
         }
+        // Cerrar dropdowns de traducción de mensajes si se hace clic fuera
         document.querySelectorAll('.translate-dropdown-options.show').forEach(dropdown => {
             if (!dropdown.closest('.message-translation-dropdown').contains(e.target)) {
                  dropdown.classList.remove('show');
             }
         });
 
+        // Cerrar modales al hacer clic fuera
         if (e.target === helpModal && helpModal.classList.contains('visible')) closeHelpModal();
         if (e.target === settingsModal && settingsModal.classList.contains('visible')) closeSettingsModal();
     });
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+            // Cancelar edición si está activa
+            const editingBubble = document.querySelector('.edit-controls');
+            if (editingBubble) {
+                const messageElement = editingBubble.closest('.message');
+                if (messageElement) {
+                    cancelEdit(messageElement);
+                }
+            }
+
+            // Cerrar modales
             if (helpModal.style.display !== 'none' && helpModal.classList.contains('visible')) closeHelpModal();
             if (settingsModal.style.display !== 'none' && settingsModal.classList.contains('visible')) closeSettingsModal();
             
@@ -1120,6 +1533,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => summaryModal.style.display = 'none', 300);
             }
 
+            // Cerrar dropdowns
             if (languageOptions && languageOptions.classList.contains('show')) languageOptions.classList.remove('show');
             document.querySelectorAll('.translate-dropdown-options.show').forEach(dropdown => dropdown.classList.remove('show'));
         }

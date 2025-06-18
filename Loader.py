@@ -28,7 +28,13 @@ except ImportError:
     print("To enable OCR, please install them: pip install pytesseract pdf2image Pillow")
     print("And ensure Tesseract OCR engine is installed on your system.")
 
-# --- Configuration ---
+# ==============================================================================
+# SECCIÓN 2: CONFIGURACIÓN
+# ==============================================================================
+# Define todas las constantes y parámetros configurables para el script.
+# Esto incluye rutas de directorios, el nombre de la colección en la base de datos,
+# la clave de API de OpenAI, y parámetros para la división del texto en fragmentos (chunks).
+
 load_dotenv() # Load environment variables from .env file
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -59,14 +65,25 @@ if OCR_CAPABLE and TESSERACT_CMD_PATH:
 POPPLER_PATH = None
 
 
-# --- Setup Logging ---
+# ==============================================================================
+# SECCIÓN 3: CONFIGURACIÓN DE LOGGING
+# ==============================================================================
+# Configura el sistema de registro (logging) para mostrar mensajes informativos,
+# advertencias y errores durante la ejecución del script, facilitando el seguimiento
+# y la depuración.
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
 logger = logging.getLogger(__name__)
 warnings.filterwarnings("ignore", category=UserWarning, module='pdfminer')
 pil_logger = logging.getLogger('PIL') # Suppress verbose PIL logging if necessary
 pil_logger.setLevel(logging.INFO)
 
-# --- Helper Functions & Tokenizer ---
+# ==============================================================================
+# SECCIÓN 4: FUNCIONES DE AYUDA Y TOKENIZADOR
+# ==============================================================================
+# Contiene funciones de utilidad, como la que inicializa la función de embedding
+# de OpenAI y la que cuenta tokens en un texto usando 'tiktoken'.
+
 def get_embedding_function() -> OpenAIEmbeddingFunction:
     if not OPENAI_API_KEY:
         raise ValueError("OPENAI_API_KEY not found in environment variables.")
@@ -81,7 +98,14 @@ except KeyError:
 def count_tokens(text: str) -> int:
     return len(tokenizer.encode(text))
 
-# --- Text Extraction with OCR ---
+# ==============================================================================
+# SECCIÓN 5: EXTRACCIÓN DE TEXTO CON OCR
+# ==============================================================================
+# Funciones dedicadas a extraer texto de diferentes tipos de archivo.
+# 'extract_text_from_pdf_with_ocr' es notable por su estrategia dual: primero
+# intenta extraer texto digital y, si falla o el texto es pobre, recurre al
+# Reconocimiento Óptico de Caracteres (OCR).
+
 def ocr_pdf_page(image: Image) -> str:
     """Performs OCR on a single image (PDF page)."""
     if not OCR_CAPABLE:
@@ -159,7 +183,13 @@ def extract_text_from_docx(file_path: Path) -> str:
         logger.error(f"Error extracting text from DOCX {file_path.name}: {e}")
         return ""
 
-# --- Text Processing, Chunking, Metadata ---
+# ==============================================================================
+# SECCIÓN 6: PROCESAMIENTO DE TEXTO, CHUNKING Y METADATOS
+# ==============================================================================
+# Este bloque se encarga de procesar el texto extraído: limpiarlo, dividirlo en
+# fragmentos (chunks) de tamaño manejable para el modelo de embedding, y generar
+# metadatos detallados para cada archivo y chunk.
+
 def clean_text(text: str) -> str:
     text = re.sub(r'\s+', ' ', text) # Consolidate multiple whitespace characters
     text = re.sub(r'\n\s*\n', '\n\n', text) # Normalize multiple newlines to consistent double newlines
@@ -295,7 +325,13 @@ def get_file_metadata(file_path: Path) -> Dict[str, Any]:
         "processed_at_loader_timestamp": datetime.now().timestamp()
     }
 
-# --- ChromaDB Interaction ---
+# ==============================================================================
+# SECCIÓN 7: INTERACCIÓN CON CHROMADB
+# ==============================================================================
+# Funciones para inicializar el cliente de ChromaDB, crear o acceder a una
+# colección, y la función principal 'process_and_load_documents' que orquesta
+# todo el proceso de carga de datos en la base de datos vectorial.
+
 def initialize_chroma_client() -> chromadb.ClientAPI: # Or simply chromadb.Client    logger.info(f"Initializing ChromaDB client at: {CHROMA_DB_DIR}")
     if not CHROMA_DB_DIR.exists():
         CHROMA_DB_DIR.mkdir(parents=True, exist_ok=True)
@@ -434,7 +470,15 @@ def process_and_load_documents(collection_to_load: chromadb.Collection, force_oc
     except Exception as e:
         logger.error(f"Could not get total count from collection '{COLLECTION_NAME}': {e}")
 
-# --- Main Execution ---
+# ==============================================================================
+# SECCIÓN 8: EJECUCIÓN PRINCIPAL
+# ==============================================================================
+# Este es el punto de entrada del script cuando se ejecuta directamente.
+# Verifica la configuración, inicializa los componentes (ChromaDB, función de
+# embedding) y llama a la función principal de procesamiento de documentos.
+# Incluye lógica para crear un archivo de demostración si el directorio de
+# entrada está vacío.
+
 if __name__ == "__main__":
     logger.info("Starting HR Document Loader script with OCR capabilities.")
     

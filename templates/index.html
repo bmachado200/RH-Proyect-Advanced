@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HR Assistant</title>
+    <link rel="icon" type="C:\Users\am5248\Desktop\RH-Proyect-A.J-main\static\favicon-32x32.png" href="{{ url_for('static', filename='icons8-chatbot-96.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -83,15 +84,38 @@
             <div class="modal-content">
                 <span class="close-modal">&times;</span>
                 <h2 id="helpModalTitle">About HR Assistant</h2>
-                <p id="helpModalText">This AI assistant specializes in HR policies and procedures.</p>
-                <h3 id="helpModalCapabilities">Capabilities:</h3>
+                <p id="helpIntro"></p> <!-- Este p contendrá helpText -->
+
+                <h3 id="helpHowItWorksTitle"></h3>
                 <ul>
-                    <li id="helpModalItem1">Answer questions about employee rights</li>
-                    <li id="helpModalItem2">Explain HR policies and procedures</li>
-                    <li id="helpModalItem3">Provide information about benefits</li>
-                    <li id="helpModalItem4">Clarify work regulations</li>
+                    <li id="helpHowItWorks1"></li>
+                    <li id="helpHowItWorks2"></li>
+                    <li id="helpHowItWorks3"></li>
                 </ul>
-                <p id="helpModalLanguage">The assistant supports English, Spanish, Simplified Chinese, and Traditional Chinese.</p>
+
+                <h3 id="helpCitationsTitle"></h3>
+                <ul>
+                    <li id="helpCitations1"></li>
+                    <li id="helpCitations2"></li>
+                </ul>
+
+                <h3 id="helpFeaturesTitle"></h3>
+                <ul>
+                    <li id="helpFeatures1"></li>
+                    <li id="helpFeatures2"></li>
+                    <li id="helpFeatures3"></li>
+                    <li id="helpFeatures4"></li>
+                    <li id="helpFeatures5"></li>
+                </ul>
+
+                <h3 id="helpSettingsTitle"></h3>
+                <ul>
+                    <li id="helpSettings1"></li>
+                    <li id="helpSettings2"></li>
+                    <li id="helpSettings3"></li>
+                </ul>
+
+                <p id="helpModalLanguage"></p>
             </div>
         </div>
 
